@@ -1,0 +1,12 @@
+1) https://www.youtube.com/watch?v=mpSeDeAU4Cw
+(Azure | App Service | Web Apps | with Git Repository example | Website Deployment)
+
+2) https://www.youtube.com/watch?v=kIMxccX1BaI
+   (Azure NAT Gateway)
+
+3) Azure Public DNS
+
+4) Azure Private DNS
+
+5) Azure static web site hosting
+
