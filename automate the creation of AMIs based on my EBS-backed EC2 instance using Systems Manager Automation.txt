@@ -1,0 +1,46 @@
+automate the creation of AMIs based on my EBS-backed EC2 instance using Systems Manager Automation
+
+You can use AWS Systems Manager to create a maintenance window, and then register an automation task to automate the creation of the AMIs. This process is applicable for both Windows and Linux instances.
+
+The instance that you want to create an AMI for must be listed as a managed instance in Systems Manager. First, verify that the instance meets all prerequisites for using Systems Manager. If the instance uses a private subnet, you can create VPC endpoints for Systems Manager.
+
+Note (Windows only): Sysprep isn't run on Windows instances before creating an AMI when you use the following automation process.
+Resolution
+To automate the creation of AMIs, follow these steps:
+
+Create Ec2 instances and attach the system manager full permissions
+
+1) Goto IAM console ---> Roles ---> Select Ec2 ---> select AmazonSSMMaintenenceWindowsRole and create role
+2) Choose add inline policy ---> select service ---> select Ec2 ---> select the Write Access level ---> choose Createimage and under the Read Access level ---> select choose DescribeImage
+3) Go to the trust relationships
+
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": [ 
+           "ssm.amazonaws.com",
+            "ec2.amazonaws.com"   
+         ]
+      },  
+      "Action": "sts:AssumeRole",
+      "Condition": {}
+    }
+  ]
+}
+4) Go to systems manager and select maintainance windows option --> Create Maintainance window ---> Give the name ---> select Cron scheduled Builder (Every Tuesday 12:00hrs)---> Specify the duration 2 hrs and 1hr stop initiating tasks ---> create
+5) Select the maintainance window ---> select Action ---> Register Targets 
+6) Give name and description ---> Targets (select the instances) ---> Register Target 
+7) Go back to the maintanance window ---> Actions ---> Register Automation Tasks
+8) Enter name and description ---> Select the document (AWS Create Image) ---> select the register target group ---> select the target which is created
+9) Rate control (concurrency 1 targets) and (error threshold 1 errors)
+10) Select the IAM Role created
+11) In Input parameters (instanceID = {{TARGET_ID}} ---> Register Automation Tasks
+
+
+
+    
+   

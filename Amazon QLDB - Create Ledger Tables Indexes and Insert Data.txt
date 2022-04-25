@@ -1,0 +1,128 @@
+Amazon QLDB - Create Ledger Tables Indexes and Insert Data
+
+Create a Ledger
+
+NYCInsurance
+
+Create tables
+
+CREATE TABLE Customer
+CREATE TABLE Policies
+CREATE TABLE Claims
+
+Create Indexes
+
+CREATE INDEX ON Customer (Customer ID)
+CREATE INDEX ON Policies (Policy ID)
+CREATE INDEX ON Claims (Claim ID)
+
+Insert Data
+
+ INSERT INTO Customer
+<< {
+    'CustomerID' : 'C901',
+    'FirstName' : 'John',
+    'LastName' : 'Smith',
+    'DOB' : '1992-03-12',
+    'SSN' : '874873456',
+    'Address' : '171 24th St, NYC, NY, USA 10001'
+},
+{
+    'CustomerID' : 'C902',
+    'FirstName' : 'Jane',
+    'LastName' : 'Smith',
+    'DOB' : '1922-03-12',
+    'SSN' : '473873456',
+    'Address' : '98 42th St, NYC, NY, USA 10021'
+},
+{
+    'CustomerID' : 'C903',
+    'FirstName' : 'Tim',
+    'LastName' : 'Brown',
+    'DOB' : '1987-03-12',
+    'SSN' : '938939456',
+    'Address' : '11 5th St, NYC, NY, USA 19931'
+}>>
+
+
+INSERT INTO Policies
+<< {
+    'CustomerID' : 'C901',
+    'PolicyID' : 'P201',
+    'PolicyType' : 'Auto',
+    'StartDate' : '1992-03-12',
+    'EndDate' : '2019-10-7'
+},
+{
+    'CustomerID' : 'C902',
+    'PolicyID' : 'P202',
+    'PolicyType' : 'Life',
+    'StartDate' : '2001-10-1',
+    'EndDate' : '2019-10-7'
+},
+{
+   'CustomerID' : 'C902',
+    'PolicyID' : 'P203',
+    'PolicyType' : 'Auto',
+    'StartDate' : '2001-10-1',
+    'EndDate' : '2019-10-7'
+},
+{
+    'CustomerID' : 'C902',
+    'PolicyID' : 'P204',
+    'PolicyType' : 'Home',
+    'StartDate' : '2001-10-1',
+    'EndDate' : '2019-10-7'
+},
+{
+    'CustomerID' : 'C901',
+    'PolicyID' : 'P205',
+    'PolicyType' : 'Life',
+    'StartDate' : '1992-03-12',
+    'EndDate' : '2019-10-7'
+},
+{
+    'CustomerID' : 'C903',
+    'PolicyID' : 'P206',
+    'PolicyType' : 'Auto',
+    'StartDate' : '1992-03-12',
+    'EndDate' : '2019-10-7'
+},
+{
+    'CustomerID' : 'C901',
+    'PolicyID' : 'P207',
+    'PolicyType' : 'Life',
+    'StartDate' : '1992-03-12',
+    'EndDate' : '2019-10-7'
+}>>
+
+INSERT INTO Claims
+<< {
+    'ClaimID' : 'CL1234',
+    'PolicyID' : 'P201',
+    'ClaimDate' : '2009-10-7',
+    'ClaimAmount' : '2839.09',
+    'PaidAmount':'98',
+    'PaidDate' :'2009-10-8',
+    'Status' : 'Processed'
+},
+{
+    'ClaimID' : 'CL904',
+    'PolicyID' : 'P202',
+    'ClaimDate' : '2019-09-7',
+    'ClaimAmount' : '792.03',
+    'PaidAmount':'0',
+    'PaidDate' : '',
+    'Status' : 'Pending'
+},
+{
+    'ClaimID' : 'CL1824',
+    'PolicyID' : 'P203',
+    'ClaimDate' : '2019-09-7',
+    'ClaimAmount' : '8929.00',
+    'PaidAmount':'0',
+    'PaidDate' : '',
+    'Status' : 'Pending'
+} >>
+
+

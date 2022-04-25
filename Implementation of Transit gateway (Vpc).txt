@@ -1,0 +1,47 @@
+ Implementation of Transit gateway
+
+create 4 Vpc in any region ex(N.varginia)
+
+ VPC-1 = 10.1.0.0/16
+ VPC-2 = 10.2.0.0/16
+ VPC-3 = 10.3.0.0/16
+ VPC-4 = 10.4.0.0/16
+
+Create a subnets all are in public 
+
+10.1.0.0/24
+10.2.0.0/24
+10.3.0.0/24
+10.4.0.0/24
+
+Create a Route table all name public-RT and Attach IGW (Internet gateway)
+
+Go to transit Gateway
+
+create transit gateway 
+name tag = TGW1	
+and leave everything as default and create transit gateway
+
+Create 4 instances each of the VPC and place in a public subnet
+
+create a Transit gateway attachments
+select the Transit gateway ID
+select VPC
+in attachment name tag  VPC-1-TWG
+select the Vpc 1 in VPCID
+select the AZ 
+create the attachment
+
+same way attach all VPC to TWG
+
+us-east-1a - 3 vpc(1,3,4)
+us-east-1b - 1 vpc(2)
+
+check its came all avaliable state
+
+go to route table
+select the Vpc1 ---> edit routes ---> add the entries ---> 10.0.0.0/8 select the TWG
+do this for all route tables
+
+Ping all machines and check 
+

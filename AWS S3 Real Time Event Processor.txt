@@ -1,0 +1,104 @@
+AWS S3 Real Time Event Processor
+
+
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+
+Description: >
+  AWS Lambda to process new S3 Objects - For ex, Image Resizing, Object Recognition, Insert to DynamoDB etc.
+
+Parameters:
+  debugMODE:
+    Description: Do you want to enable logging.
+    Default: "False"
+    Type: String
+    AllowedValues: ["True", "False"]
+    ConstraintDescription: Must be boolean.
+  FunctionNameSuffix:
+    Description: 'Suffix to append to the Lambda functions.'
+    Type: 'String'
+    Default: 'Mystique'
+
+Globals:
+  Function:
+    Runtime: python3.7
+    Timeout: 10
+    MemorySize: 128
+    Environment:
+      Variables:
+        DEBUG_MODE:
+          Ref: debugMODE
+
+Resources:
+
+  EventProcessor:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: 'AWS Lambda to process new S3 Objects - For ex, Image Resizing, Object Recognition, Insert to DynamoDB etc.'
+      FunctionName: !Sub 'EventProcessor-${FunctionNameSuffix}'
+      Handler: serverless-s3-event-processor.lambda_handler
+      CodeUri: ./src/serverless-s3-event-processor.py
+      Events:
+        EventTrigger1:
+          Type: S3
+          Properties:
+            Bucket: !Ref EventBucket
+            Events: s3:ObjectCreated:*
+      Policies: 
+        - AWSLambdaExecute # Managed Policy
+        # - Version: '2012-10-17' # Policy Document
+        #   Statement:
+        #     - Effect: Allow
+        #       Action:
+        #         - s3:GetObject
+        #         - s3:GetObjectACL
+        #        Resource: !GetAtt EventBucket.Arn
+
+  EventBucket:
+    Type: AWS::S3::Bucket
+
+Outputs:
+  S3EventBucket:
+    Description: S3 Bucket that triggers the Lambda
+    Value: !Ref EventBucket
+  EventProcessorFunction:
+    Description: ARN for the EventProcessor Lambda Function
+    Value: !GetAtt EventProcessor.Arn
+
+
+
+Clone the repository
+git clone https://github.com/miztiik/serverless-s3-event-processor.git
+Customize the deployment
+Edit the ./helper_scripts/deploy.sh to update your environment variables. The expected output in cloudwatch logs should look like this,
+
+AWS_PROFILE="default"
+BUCKET_NAME="sam-templates-011" # bucket must exist in the SAME region the deployment is taking place
+SERVICE_NAME="serverless-s3-event-processor"
+TEMPLATE_NAME="${SERVICE_NAME}.yaml"
+STACK_NAME="${SERVICE_NAME}"
+OUTPUT_DIR="./outputs/"
+PACKAGED_OUTPUT_TEMPLATE="${OUTPUT_DIR}${STACK_NAME}-packaged-template.yaml"
+Deployment
+We will use the deploy.sh in the helper_scripts directory to deploy our AWS SAM template
+
+chmod +x ./helper_scripts/deploy.sh
+./helper_scripts/deploy.sh
+Test Event Processor
+Upload an object to the S3 Bucket or use the event.json in the src directory to test the lambda function. In the lambda logs you will see the following output,
+
+{
+  "status": "True",
+  "TotalItems": {
+    "Received": 1,
+    "Processed": 1
+  },
+  "Items": [
+    {
+      "time": "2019-05-08T18:51:00.097Z",
+      "object_owner": "AWS:AIDdR7KsQLWs56LRA",
+      "bucket_name": "serverless-s3-event-processor-eventbucket-novet8m933s4",
+      "key": "c19cf74b-ca14-4458-b2f1-c97b51789f67.xls"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+users to connect to Amazon RDS with IAM credentials
+
+steps
+1) Launch a Mysql database select the version 5.6.40 and select the IAMDb Authentication
+2) Create a IAM Role
+   Choose Ec2 --> Manually attach a policy
+ 
+ {
+   "Version": "2012-10-17",
+   "Statement": [
+      {
+         "Effect": "Allow",
+         "Action": [
+             "rds-db:connect"
+         ],
+         "Resource": [
+             "arn:aws:rds-db:us-east-2:1234567890:dbuser:db-ABCDEFGHIJKL01234/db_user"
+         ]
+      }
+   ]
+}
+
+Give the username and Account ID
+3) select the policy which created above and attach to the role
+4) Launch the EC2 instance and install mysql and Attach the IAM role which is created
+5) Login to Mysql
+6) CREATE USER {dbusername} IDENTIFIED WITH AWSAuthenticationPlugin as 'RDS'; --> Give the same username which provided in the IAM Policy
+7) go back to Ec2 instance and type the below command
+
+    aws rds generate-db-auth-token --hostname {db or cluster endpoint} --port 3306 --username {db username} --> This Token will expire in 15 minutes
+8) download the certificate 
+     wget https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem
+     RDSHOST="rdsmysql.abcdefghijk.us-west-2.rds.amazonaws.com" ---> give the endpoint
+     TOKEN="$(aws rds generate-db-auth-token --hostname $RDSHOST --port 3306 --region us-west-2 --username jane_doe )"
+     mysql --host=$RDSHOST --port=3306 --ssl-ca=/sample_dir/rds-ca-2015-root.pem --enable-cleartext-plugin --user=jane_doe --password=$TOKEN
+
+
+
+
+
+
+

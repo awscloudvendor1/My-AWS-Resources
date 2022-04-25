@@ -1,0 +1,109 @@
+Amazon AWS Network Elastic Load Balancer (ELB) 
+ 
+
+
+Pre-Step 1) we will have two EC2 instance; one we will have Windows 2008 server and another Linux Server
+
+ 
+
+Step 1) In here we have two Websites ; one running on Linux Machine on Default port #80 and another one on Windows IIS Webserver on port 8080
+
+ 
+
+Step 2) inside the IIS we need to go to IIS manager and change the binding to point to port 8080 and also create a custom rule so that the Windows Firewall will accept port 8080 as inbound
+
+ 
+
+Step 3) When you install IIS webserver; you will have a folder called C:\inetpub\wwwroot
+
+ 
+
+Then inside above folder ; make sure create a file and called it healthy.html and make sure you will be able to access via IE browser; that is  http://x.x.x.x:8080/healthy.html
+
+ 
+
+http://54.236.241.245:8080/healthy.html
+
+ 
+
+Step 4) make sure on Linux machine you will have a file inside the folder
+
+cd /var/www/html a filed called healthy.html ( otherwise your health check will not work) we will see it inside the lab.
+
+So make sure when you type this in IE browsers http://54.174.68.136/healthy.html
+
+you will see something ( use your own IP address)
+
+ 
+
+Step 5) Now we will go over the labs ; the goal is that when we create a network  ELB ; when you type in the URL:80 it goes to Linux Machine and when you type in URL:8080 it will go to Windows Machine.
+
+ 
+
+Step 6) First we will configure the two Target Group (this is the best way to do it) then we will create Network ELB
+
+ 
+
+Step 7) First I create a Target group called:
+
+WindowsGP1 ( Make sure pic TCP port 8080)
+LinuxGP2 (make sure pic TCP port 80)
+ 
+
+Step 8) for both group, when you do the health check, make sure pick HTML and in both cases use file healthy.html (remember we have created these file inside the Linux and Windows machine on corresponding folder)
+
+ 
+
+Step 9) after you have created the target group ; you need to go to each Target group and click on the Target Tab ; then you need to pick correct EC2 and make sure you click add to register it and make sure save it. ( do not forget to save it).
+
+ 
+
+Step 10) Now I will go create my Network ELB ; and in here make sure add two listeners in here , one for TCP port 80 and another one for TCP port 8080
+
+ 
+
+Step 11) Make sure you will pick correct AZ and pick correct AZ in correct Public Subnet that you have , as you see in here we have choice of IP address ( we did not have this choice in Class ELB or Application ELB)
+
+ 
+
+Step 12 ) We can also pick Elastic IP address. ( lets not do it now)
+
+ 
+
+Step 13) Next we need to pick the Target group , so we can pick any of the target group for now I will pick WindowsTG1 ( it does not matter as we will see later on ).
+
+ 
+
+Step 14) As you see when you pick the WindowsTG1 , it will fill in with the parameter we filled up before.
+
+ 
+
+Step 15) Now if you go back to Target group on the left side and click on the description ; you will see in front of Load balancer , the Network ELB ; but when
+
+ 
+
+you go to LinuxTG2 ; you do not see it ; since when I was doing step 12 in above ; I pick the WindowsTG1
+
+ 
+
+Step 16) when you look at TAB called Target Tab on WindowsGP1 , you will see it says healthy ( which is good) but when you go under the Target tab of LinuxGP2, I see “Unused”  since we did not pick on step 12
+
+ 
+
+Step 17) Now let’s go to LoadBalancer on the Left side and when you click on the Listener ; it is Pointed to Windows; but we need to point windows only for port 8080 and Linux to point to port 80, so next to port 80 , click on it and the click edit; then pick Linux ,
+
+ 
+
+Step 18) Make sure now port 80 goes to Linux
+
+Port 8080 goes to Windows on the Listener Tab.
+
+ 
+
+Step 19) Now if I go to left side and click on the Target group ; then when you click on the LinuxTG2 , you will see it is being initialized (first) then it will be healthy.
+
+Step 20) If you go to ELB and click on the descriptions TAB and the copy and paste long DNS name you should be able to get the Linux machine with port 80 and Windows machine with port 8080
+
+ 
+
+http://networkelb-f4556e12cdccebde.elb.us-east-1.amazonaws.com:8080/

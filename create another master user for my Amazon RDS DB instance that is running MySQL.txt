@@ -1,0 +1,22 @@
+create another master user for my Amazon RDS DB instance that is running MySQL
+
+I want another user with the same permissions as the master user for my Amazon Relational Database Service (Amazon RDS) instance that running MySQL. How do I duplicate or clone the master user?
+Resolution
+A DB instance running MySQL can have only one master user, but it's possible to create a new user that has all the same permissions as the master user. To create a new user that has master permissions, follow these steps:
+
+1.    Run the SHOW GRANTS command to get a list of the permissions currently available to the master user, and copy the list of permissions to use later:
+mysql> SHOW GRANTS FOR 'master_user';
+The command provides output similar to the following:
++----------------------------+
+| Grants for master_user@%
++----------------------------+
+| GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, RELOAD, PROCESS, REFERENCES, INDEX, ALTER, SHOW DATABASES, CREATE TEMPORARY TABLES, LOCK TABLES, EXECUTE, REPLICATION SLAVE, REPLICATION CLIENT, CREATE VIEW, SHOW VIEW, CREATE ROUTINE, ALTER ROUTINE, CREATE USER, EVENT, TRIGGER ON *.* TO 'master_user'@'%' IDENTIFIED BY PASSWORD '<password>' WITH GRANT OPTION |
+
+2.    Create a new user by running the CREATE USER command:
+mysql> CREATE USER 'new_master_user'@'%' IDENTIFIED BY 'password';
+Note: Replace "new_master_user" and "password" with your user name and password.
+
+3.    Grant the list of permissions you got in step 1 to the new user by running the GRANT command:
+mysql> GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, RELOAD, PROCESS, REFERENCES, INDEX, ALTER, SHOW DATABASES, CREATE TEMPORARY TABLES, LOCK TABLES, EXECUTE, REPLICATION SLAVE, REPLICATION CLIENT, CREATE VIEW, SHOW VIEW, CREATE ROUTINE, ALTER ROUTINE, CREATE USER, EVENT, TRIGGER ON *.* TO 'new_master_user'@'%' WITH GRANT OPTION;
+
+The new user will now have the same permissions as the master user.

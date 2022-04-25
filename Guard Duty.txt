@@ -1,0 +1,116 @@
+GuardDuty-Findings-to-SNS
+
+Amazon GuardDuty Findings to SNS
+Every GuardDuty finding is assigned a finding ID. For every finding with a unique finding ID, GuardDuty aggregates all subsequent occurrences of a particular finding that take place in six-hour intervals into a single event. GuardDuty then sends a notification about these subsequent occurrences based on this event. We can use this to push the notifications into SNS topic, and getting the security teams to investigate the findings.
+
+Pre-Requisities
+We will need the following pre-requisites to successfully complete this activity,
+
+A SNS topic to which our lambda will publish the GuardDuty Findings. Help for setting up SNS Topic
+<ARN-OF-YOUR-SNS-TOPIC> - We need this to update in the IAM Policy
+An email address already subscribed to this topic
+IAM Role - i.e Lambda Service Role - with two permissions; Help for setting up IAM Role
+AWSLambdaBasicExecutionRole - To allow Lambda to log events
+InlinePolicy - To allow Lambda to publish to SNS topic
+Step 0: IAM Policy
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": "sns:Publish",
+            "Resource": "<ARN-OF-YOUR-SNS-TOPIC>"
+        }
+    ]
+}
+Step 1 - Configure Lambda Function- Serverless Janitor
+The python script is written(and tested) in Python 3.6. Remember to choose the same in AWS Lambda Functions.
+
+Customisations
+Change the global variables at the top of the script to suit your needs.
+
+globalVars['SNSTopicArn']] - Update the code with your <ARN-OF-YOUR-SNS-TOPIC>; you can also do that using Lambda Environment variables
+Copy the code from Serverless-GuardDuty-Findings-To-SNS in this repo to the lambda function
+
+Consider increasing the lambda run time as needed, the default is 3 seconds.
+Save the lambda function
+
+Step 2 - Configure Lambda Triggers
+Goto the Cloudwatch Dashboard, We are going to use Event Rules
+
+Choose Create a new Rule
+For Event Source - Choose Event pattern
+For Service, Choose/Type GuardDuty
+For Event Type, Choose GuardDuty Finding
+For Target, Choose Lambda Function
+From dropdown select your Lambda Function Name
+In the bottom, Configure Details
+Fill the Rule Name & Rule Description
+Make sure it is Enabled
+Enable Trigger by Checking the box
+Click Save
+Now your lambda function should be triggered when ever there is a GuardDuty Findings
+
+Lambda Code
+
+
+import boto3, os, sys, json, logging
+
+# Set the global variables
+globalVars  = {}
+globalVars['Owner']                 = "PaulZeedupTechnologies"
+globalVars['Environment']           = "Development"
+globalVars['REGION_NAME']           = "eu-central-l"
+globalVars['tagName']               = "Serverless-GuardDuty-Findings-To-CloudWatch-Events"
+globalVars['SNSTopicArn']           = ""
+
+sns_client = boto3.client('sns')
+
+# Set the log format
+logger = logging.getLogger()
+for h in logger.handlers:
+  logger.removeHandler(h)
+
+h = logging.StreamHandler(sys.stdout)
+FORMAT = ' [%(levelname)s]/%(asctime)s/%(name)s - %(message)s'
+h.setFormatter(logging.Formatter(FORMAT))
+logger.addHandler(h)
+logger.setLevel(logging.INFO)
+
+"""
+If User provides different values, override defaults
+"""
+def setGlobalVars():
+    try:
+        if os.environ['SNSTopicArn']:
+            globalVars['SNSTopicArn']  = os.environ['SNSTopicArn']
+    except KeyError as e:
+        logger.error('ERROR: SNS Topic ARN is missing, Using default GlobalVars - {0}'.format( globalVars['SNSTopicArn'] ) )
+        logger.error('ERROR: {0}'.format( str(e) ) )
+        pass
+
+"""
+This function pushes GuardDuty *Findings* to SNS Topic to be picked up ITSM Tools for Alerting.
+"""
+
+def push_To_SNS_Topic(event):
+    try:
+        response = sns_client.publish(
+        TopicArn = globalVars['SNSTopicArn'],
+        Message = json.dumps(event),
+        Subject = event['detail']['title']
+        )
+        logger.info('SUCCESS: Pushed GuardDuty Finding to SNS Topic')
+        return "Successly pushed to Notification to SNS Topic"
+    except KeyError as e:
+        logger.error('ERROR: Unable to push to SNS Topic: Check [1] SNS Topic ARN is invalid, [2] IAM Role Permissions{0}'.format( str(e) ) )
+        logger.error('ERROR: {0}'.format( str(e) ) )
+
+
+def lambda_handler(event, context):
+    setGlobalVars()
+    return push_To_SNS_Topic(event)
+
+if __name__ == '__main__':
+    lambda_handler(None, None)

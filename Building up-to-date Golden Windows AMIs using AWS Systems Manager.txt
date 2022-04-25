@@ -1,0 +1,10 @@
+Building up-to-date Golden Windows AMIs using AWS Systems Manager Automation
+
+1) Lauch the CF Template and load the template
+2) Create the CF Template and Launch the template
+3) Go to system manager select automation
+4) Document name prefix: Equal: AWS-Update
+5) Choose AWS-UpdateWindowsAmi
+6) Copy paste the Ami-id of the Windows servers
+7) Click on execute automations
+8) This will create a Golden Windows AMI

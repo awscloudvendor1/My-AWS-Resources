@@ -1,0 +1,71 @@
+Establish Site-to-Site VPN Connection
+
+In this Demo N.varginia is my cloud network and Frankfut is my On-prem Network
+
+1) Create a Vpc in N.varginia name tag = customvpc
+10.10.0.0/16
+2) Create IGW and attach VPC
+3) create public subnet attach to vpc
+   10.10.0.0/28
+4) Go to route table (Associate the subnet) and attach the IGW
+5) Launch an instance in Custom-VPC
+   in security groups open the ssh (My ip), All TCP 10.20.0.0/16 and All Icmp (10.20.0.0/16)
+6) Launch the instance
+
+Create a VPC in Frankfut region
+
+1) Create a Vpc in Frankfut name tag = customvpc
+10.20.0.0/16
+2) Create IGW and attach VPC
+3) create public subnet attach to vpc
+   10.20.0.0/28
+4) Go to route table (Associate the subnet) and attach the IGW
+5) Launch an instance in Custom-VPC
+   in security groups open the ssh (My ip), Al TCP 10.10.0.0/16 and All Icmp (10.10.0.0/16)
+6) Launch the instance and install ?yum install openswan
+
+Create a VPN Connection in N.varginia region
+
+1) Create a Virtual private gateway and name it my-vpg
+2) Attach to vpc
+3) Create a Customer Gateway static (give the Frankfut ec2-intance public ip here) 
+4) select site to site vpn 
+    select the Virtual private gateway
+    customer gateway
+    static (10.20.0.0/16) 
+    
+5) Download the configuration file and select the generic (vendor Agnostic)
+6) Access the frankfut ec2 instance and type
+    vi /etc/ipsec.d/aws-vpn.conf
+    
+   conn Tunnel1
+        authby=secret
+        auto=start
+        left=%defaultroute
+        leftid=Customer end VPN public IP ----> (frankfut instance public ip)
+        right=AWS VPN Tunnel 1 public IP
+        type=tunnel
+        ikelifetime=8h
+        keylife=1h
+        phase2alg=aes128-sha1;modp1024
+        ike=aes128-sha1;modp1024
+        keyingtries=%forever
+        keyexchange=ike
+        leftsubnet=10.20.0.0/16
+        rightsubnet=10.10.0.0/16
+        dpddelay=10
+        dpdtimeout=30
+        dpdaction=restart_by_peer
+
+7) save and exit
+8) go to vi /etc/ipsec.d/aws-vpn.secrets
+   Customer end VPN public IP AWS VPN Tunnel 1 public IP : PSK "pre-sharedsecretkey"
+
+9) Commands to enable/start ipsec service
+           $ chkconfig ipsec on
+           $ service ipsec start
+           $ service ipsec status
+
+10) Check the Tunnel is up and ping 2 instances 
+
+

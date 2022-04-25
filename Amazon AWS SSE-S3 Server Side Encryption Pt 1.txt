@@ -1,0 +1,77 @@
+Amazon AWS SSE-S3 Server Side Encryption Pt 1
+
+AWS provides various options to encrypt your data on S3.
+
+ 
+
+There are 2 types of encryption:
+
+ 
+
+Client side: Client encrypts locally using tool/software of their choices
+
+Server Side encryption: Choose from available choices in AWS
+
+In this video, our focus will be Server Side Encryption (SSE) since Client side is open to your preference/choices/requirement.
+
+ 
+
+Server Side has 3 types of encryption as well:
+
+ 
+
+SSE-S3: One click encryption
+
+SSE-KMS: Using KMS
+
+SSE-C: Not available in console. Customer provides the keys
+
+ 
+
+Encrypt a file using SSE S3:
+
+ 
+
+$ aws s3 cp abcd.txt s3://kms-test11 –sse
+
+ 
+
+To  create a  kms key:
+
+$ aws kms create-key -description “my kms key”
+
+ 
+
+List all the keys:
+
+$aws kms aws kms list-keys
+
+ 
+
+This will not help us identify the correct key. Create an Alias for the key we created:
+
+aws kms create-alias –alias-name alias/example-alias –target-key-id 1234abcd-12ab-34cd-56ef-1234567890ab
+
+ 
+
+ 
+
+Then let’s list the alias of the keys as well.
+
+$ aws kms list-aliases
+
+ 
+
+To upload and encrypt a file to S3 bucket using your KMS key:
+
+ 
+
+aws s3 cp file.txt s3://kms-test11 –sse aws:kms –sse-kms-key-id 4dabac80-8a9b-4ada-b3af-fc0faaaac5
+
+ 
+
+Upload and encrypt a file using default KMS Key for S3 in the region:
+
+ 
+
+aws s3 cp file.txt s3://kms-test11 –sse aws:kms

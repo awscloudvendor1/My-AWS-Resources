@@ -1,0 +1,51 @@
+Configuring S3 Glacier
+
+1) Login to us-east-1 region
+2) Give the vaultname DemoVaultAWS
+3) Set the event notifications (Enable notifications)
+4) Set the topic name (Glacierjobupdates)
+5) select both ArchiveRetrievel job complete and Vault inventory Retrieval job complete
+6) Create a SNS topic and enable notifications and attach in glacier
+7) Configure the below Vault settings
+   
+     (Create a vault)
+   i) aws glacier create-vault --vault-name namvault --account-id -
+     (Upload Archives to a vault)
+   ii) aws glacier upload-archive --account-id --vault-name namvault --body One.txt (create a one.txt file with 10 lines of one text typed)
+   iii) aws glacier upload-archive --account-id --vault-name namvault --body Two.txt (Create a two.txt file with a single line Two text is here)
+    (Initiate job to retreive archive inventory)
+    (upload the 2 files into glacier and also create a two other files inventory-retrieval.json and job-archive-retrieval.json)
+    (inside the inventory-retrival file enter the below details)
+     {
+     "Type": "inventory-retrieval"
+     }
+
+   and type the content inside the job-archive-retrieval.json
+    {
+      "Type": "archive-retrieval",
+      "ArchiveID": "copy the id from the one.txt upload
+        "Description": "job for one.txt"
+    }
+    
+   (Initiate job to retreive archiveinvenory of a vault)
+   iv) aws glacier initiate-job --account-id --vault-name namvault --job-parameters file://inventory-retrieval.json
+   (Initiate job to retreive an uploaded file)
+   v) aws glacier initiate-job --account-id --vault-name namvault --job-parameters file://job-archive-retrieval.json
+
+   (List all active jobs)
+  vi) aws glacier list-jobs --account-id - --vault-name namvault
+
+  (Describe an active job)
+  vii) aws glacier describe-job --account-id - --vault-name namvault --job-id (copy and paste the job id)
+
+  (Get job output- inventory retrieval)
+ viii) aws glacier get-job-output --account-id - --vault-name namvault --job-id (id of the job for the one.txt and make sure the id ends with output.json)
+
+ (Get job output- Archive retrieval)
+ ix) aws glacier get-job-output --account-id - --vault-name namvault --job-id (id of the job for the two.txt and make sure the id ends with outone.json)
+
+ make sure copy all the job-ids 
+
+
+ 
+

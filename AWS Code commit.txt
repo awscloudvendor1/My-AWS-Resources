@@ -1,0 +1,26 @@
+How To Migrate Github Repository to AWS Codecommit | How to use CodeCommit
+
+
+   1) Launch an instance in the frankfut region 
+   2) migration_dir="./_trash"
+git_url="https://github.com/miztiik/lex-faq-bot.git"
+aws_region="eu-central-1"
+codecommit_repo_name="lex-faq-bot"
+
+   3) # Create CodeCommit Repo
+        aws codecommit create-repository \
+  --repository-name ${codecommit_repo_name} \
+  --repository-description "My shiny new chat bot"
+
+ 4) git clone --mirror ${git_url} ${migration_dir}
+
+ 5) # Push the repo to CodeCommit
+cd ${migration_dir}
+git push ssh://git-codecommit.${aws_region}.amazonaws.com/v1/repos/${codecommit_repo_name} --all
+
+ 6) git push ssh://git-codecommit.${aws_region}.amazonaws.com/v1/repos/${codecommit_repo_name} --tags
+
+
+ 7) # CleanUp - Remove local copy
+rm -rf ${migration_dir}
+

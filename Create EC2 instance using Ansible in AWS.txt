@@ -1,0 +1,32 @@
+Create EC2 instance using Ansible in AWS
+
+1) Launch an AmiLinux instance in the region
+2) Access the Instance via Terminal
+3) Attach an IAM Role to the Ec2 instance 
+   Select Ec2 Role in IAM ---> Permissions ---> Select the Ec2fullaccess policy --> Save
+4) Take ssh and Access the Instance
+5) yum install ansible/ yum install python-pip -y
+6) pip install ansible
+7) ansible --version
+8) pip install boto
+9) Create a file task.yml
+10)- name: ec2 launcher
+  hosts: localhost
+  tasks:
+    - name: launch ec2
+      ec2:
+         instance_type: t2.micro
+         key_name: Recovery
+         image:  ami-0eb64c49a2299a148
+         region: ap-south-1
+         count: 1
+         vpc_subnet_id: subnet-0bd5897516868ee51
+         assign_public_ip: yes
+         group: default
+         instance_tags:
+           Ansible: script
+
+
+  
+12) Run the playbook
+     ansible-playbook task.yml

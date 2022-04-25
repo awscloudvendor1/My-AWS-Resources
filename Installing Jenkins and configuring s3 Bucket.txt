@@ -1,0 +1,67 @@
+Installing Jenkins and configuring s3 Bucket
+
+EC2 RHEL 7.x Instance Get help here With Internet Access
+Security Group with Port 8080 open for internet
+Java v1.8.x
+
+Install Java
+We will be using open java for our demo, Get latest version from http://openjdk.java.net/install/
+
+yum install java-1.8*
+#yum -y install java-1.8.0-openjdk
+
+Confirm Java Version
+Lets install java and set the java home
+java -version
+find /usr/lib/jvm/java-1.8* | head -n 3
+
+open the vi .bash_profile
+(do the changes)
+JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.222.b10-1.el7_7.x86_64
+PATH=$PATH:$JAVA_HOME:$HOME/bin
+
+echo $JAVA_HOME (Check for the errors)
+source ~/.bash_profile ( To set it permanently update your .bash_profile)
+
+Install Jenkins
+
+yum -y install wget
+wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo
+rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key
+yum -y install jenkins
+
+Start Jenkins
+# Start jenkins service
+systemctl start jenkins
+
+# Setup Jenkins to start at boot,
+systemctl enable jenkins
+
+Accessing Jenkins
+By default jenkins runs at port 8080, You can access jenkins at
+
+http://YOUR-SERVER-PUBLIC-IP:8080
+
+Configure Jenkins
+The default Username is admin
+Grab the default password
+Password Location:/var/lib/jenkins/secrets/initialAdminPassword
+
+select the 1st option ---> install
+
+username=Demo-user
+password = 123
+Fullname=Demo
+Email address = jay@zeedup.com
+
+click manage jenkins ---> Global Tool configuration ---> AddJDK --> JDK-1.8 --> JAVA_HOME --> /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.222.b10-1.el7_7.x86_64
+(remove automatic install)
+Delete installer ---> Delete JDK ---> Save
+
+Open New item ---> My-First-Project ---> Freestyle project ---> ok 
+come down and select build ---> Execute shell ---> 
+#!/bin/bash
+echo "Welcome to Zeedup Technologies"
+---> ok
+
+click on Build Now ---> click on the output ---> console output

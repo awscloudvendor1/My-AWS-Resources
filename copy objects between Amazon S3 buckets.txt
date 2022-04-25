@@ -1,0 +1,64 @@
+copy objects between Amazon S3 buckets
+
+To copy objects from one S3 bucket to another, follow these steps:
+
+1.    Create a new S3 bucket.
+
+2.    Install and configure the AWS Command Line Interface (AWS CLI).
+
+3.    Copy the objects between the S3 buckets.
+
+4.    Verify that the objects are copied.
+
+5.    Update existing API calls to the new bucket name.
+
+Resolution
+Create a new S3 bucket
+
+1.    Open the Amazon S3 console.
+
+2.    Choose Create Bucket.
+
+3.    Choose a DNS-compliant name for your new bucket.
+
+4.    Select your AWS Region.
+Note: It's a best practice to create the new bucket in the same Region as the source bucket to avoid performance issues associated with cross-region traffic.
+
+5.    If needed, choose Copy settings from an existing bucket to mirror the configuration of the source bucket.
+
+Install and configure the AWS Command Line Interface (AWS CLI)
+
+1.    Install the AWS CLI.
+
+2.    Configure the AWS CLI by running the following command:
+aws configure
+3.    Enter your Access Keys (Access Key ID and Secret Access Key).
+
+4.    Press Enter to skip the default Region and default output options. For information about Region parameters, see AWS Regions and Endpoints for Amazon S3.
+Note: The AWS CLI outputs are JSON, text, or table, but not all the commands support each type of output. If the command output doesn't support your chosen format, it defaults to its own format. For more information, see Controlling Command Output from the AWS CLI.
+
+Copy the objects between the S3 buckets
+
+1.    If you have archived S3 objects in Amazon Simple Storage Service Glacier, restore the objects stored in Amazon S3 Glacier.
+
+2.    Copy the objects between the source and target buckets by running the following sync command:
+
+aws s3 sync s3://SOURCE_BUCKET_NAME s3://NEW_BUCKET_NAME
+Note: Update the command to include your target and source bucket names.
+
+The sync command uses the CopyObject APIs to copy objects between S3 buckets. The sync command lists the source and target buckets to identify objects that are in the source bucket but aren't in the target bucket. The command also identifies objects in the source bucket that have different LastModified dates than the objects that are in the target bucket. The sync command on a versioned bucket copies only the current version of the object—previous versions are not copied. By default, this preserves object metadata, but the access control lists (ACLs) are set to FULL_CONTROL for your AWS account, which removes any additional ACLs. If the operation fails, you can run the sync command again without duplicating previously copied objects.
+
+Verify that the objects are copied
+
+1.    Verify the contents of the source and target buckets by running the following commands:
+
+aws s3 ls --recursive s3://SOURCE_BUCKET_NAME --summarize > bucket-contents-source.txt
+aws s3 ls --recursive s3://NEW_BUCKET_NAME --summarize > bucket-contents-new.txt
+Note: Update the command to include your source and target bucket names.
+
+2.    Compare objects that are in the source and target buckets by using the outputs that are saved to files in the AWS CLI directory. See the following example output:
+
+$ aws s3 ls --recursive s3://BUCKETNAME --summarize
+2017-11-20 21:17:39      15362 s3logo.png
+
+  Total Objects: 1        Total Size: 15362

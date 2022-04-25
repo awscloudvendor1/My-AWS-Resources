@@ -1,0 +1,9 @@
+bringing own dns server in aws
+
+cat /etc/resolv.conf
+nslookup amazon.com
+cd /etc/dhcp
+vi dhclient.conf
+
+timeout 300;
+supersede domain-name-servers 8.8.8.8;

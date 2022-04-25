@@ -1,0 +1,63 @@
+AWS Database Migration service
+
+ Requirements
+ 
+ Ec2 instance
+
+ 1) Launch an ec2 instance (Windows server 2016 with sql server 2017)
+ 2) Open the port number 1433 and 3389 in ec2 instnace
+ 3) Download the sample database
+ 
+
+ RDS Database instance
+
+ 1) Launch an RDS Instance MS-SQL standard edition
+ 2) Choose Dev/Test
+ 3) Select the DB engine version SQL Server 15.00.3035.2.v.1
+ 4) DB instance class db.r4.xlarge -4 CPU
+ 5) username (admin) and password (12345678)
+ 6) Enable port number 1433 in the RDS Security Group
+
+
+ windows server 2016 Login
+
+  1) Copy the database in the c:/drive
+  2) open the Microsoft sql server tools 17 and open the Microsoft SQL Server Management
+  3) After opening the SSMS type . (Local server) leave as (Windows Authentication) and connect
+  4) Change the Authentication (Select the SqlServer, Rightclick and properties---> Security--->change windows authentication to SQL server and windows authentication mode ---> ok
+  5) Restart the SQL server
+  6) Click on security ---> Logins--->sa (Its disabled)---> Right click on sa---> properties ---> Reset the password for the sa and uncheck the enforce password policy --> ok
+  7) sa user will not be enabled ---> Right click and properties ---> login enabled --> ok
+  8) Refresh and restart the sql server
+  9) Connect the database to the SQl server ---> Databases right click ---> Restore databases ---> device select the dots ---> Add ---> select the location of the database which is downloaded ---> ok ---> ok   ---> ok
+ 10) user can see the database Adventure open the database and select the table person.person and ensure that user have the permission to access the username sa go to security ---> Logins ---> sa ---> right click properties ---> user mappings--> select the database and select the parameter db_owner option and it will show the error
+  11) Open the new window ---> file---> new---> query with current connection and type the query below
+
+      USE [AdventureWorks2017]
+      exec sp_changedbowner 'sa','true' ---> press f5
+  12) go back to person table ---> right click and select top 1000 rows ---> check the total records in the table 
+     
+      SELECT count (*) FROM [AdventureWorks2017].[Person].[Person] ---> press f5
+  13) Connect the RDS Database --> click on connect ---> Database engine ---> Copy the RDS instance endpoint and paste in the server name and select the SQL server authentication and type the username (Admin) And password (12345678) ---> Connect
+  14) Initially the data base is empty and need to create the database rightclick Databases ---> New database ---> DMSDemoDB ---> ok
+  15) Right click the DMSDemoDB ---> propeties and check everything set
+  16) Security ---> Logins ---> and select the RDS User (Admin) ---> properties ---> user mappings and check the DMSDemoDB make sure it has the db_owner permission
+  
+
+  Configuring DMS 
+
+ 1) Create the replication instance
+ 2) Ec2sql to Rdssql
+ 3) dms.dbmedium
+ 4) select the default security groups
+ 5) create replication instance
+ 6) click on endpoints source and Target
+    source ---> MSsql-EC2 ---> select the sqlserver ---> server name will the dns endpoint of the ec2 instances ---> port 1433  ---> username sa and password sa ---> database name AdventureWorks2017 ---> Run test and check the endpoints
+
+    Target ----> select the RDS db Instance it will automatically select the RDS database ---> copy the endpoint of the RDS endpoint and paste ---> username (admin) and password (12345678) ---> database name DMSDemoDB ---> Run the test endpoint
+
+  7) After the endpoints runs successfully create a tasks (Ec2toRDS) ----> Migration type (Migrate existing data) ---> Table mappings --> select the schema person and select add selection rule ---> Create task ---> Migration will complete 
+
+ Compare the table SELECT count (*) FROM [DMSDemoDB].[Person].[Person] ---> Run f5 ---> check the column
+
+ 

@@ -1,0 +1,4 @@
+Centralize CloudTrail Log Files from Multiple Accounts, Multiple Regions | Governance & Compliance
+
+https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-set-bucket-policy-for-multiple-accounts.html
+

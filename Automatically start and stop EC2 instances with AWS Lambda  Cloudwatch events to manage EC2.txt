@@ -1,0 +1,12 @@
+Automatically start/stop EC2 instances with AWS Lambda | Cloudwatch events to manage EC2
+
+https://s3.amazonaws.com/solutions-reference/aws-instance-scheduler/latest/instance-scheduler.template
+
+Create 2 instances in ireland region (Developer and Test)
+Tag them = Name Test
+           Scheduled   uk-office-hours
+
+ provide the start tags and stop tage name
+
+  start tags = started_by=Instance-Scheduler
+  stopped_by=Instance-Scheduler

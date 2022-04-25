@@ -1,0 +1,51 @@
+Amazon AWS Solution Architecture Practice Exam 2019 – Part 2
+
+
+Question
+
+6) A web application allows customers to upload orders to an S3 bucket. The resulting Amazon S3 events trigger a Lambda function that inserts a message to an SQS queue. A singleEC2 instance reads messages from the queue, processes them, and stores them in an DynamoDB table partitioned by unique order ID. Next month traffic is expected to increase by a factor of 10 and a Solutions Architect is reviewing the architecture for possible scaling problems.Which component is MOST likely to need re-architecting to be able to scale to accommodate the new traffic?
+
+A.Lambda function
+B.SQS queue
+C.EC2 instance
+D.DynamoDB table
+
+7) An application saves the logsto an S3 bucket. A user wants to keep the logs forone month for troubleshooting purposes, and then purge the logs. What feature will enable this?
+
+A.Adding a bucket policy on the S3 bucket.
+B.Configuring lifecycle configuration rules on the S3 bucket.
+C.Creating an IAM policy for the S3 bucket.
+D.Enabling CORS on the S3 bucket.
+
+8) An application running on EC2 instances processes sensitive information stored on Amazon S3. The information is accessed over the Internet. The security team is concerned that the Internet connectivity to Amazon S3 is a security risk.Which solution will resolve the security concern?
+
+A.Access the data through an Internet Gateway.
+B.Access the data through a VPN connection.
+C.Access the data through a NAT Gateway.
+D.Access the data through a VPC endpoint for Amazon S3.
+
+9) An organization is building an Amazon Redshift cluster in their shared services VPC. The cluster will host sensitive data.How can the organization control which networks can access the cluster?
+
+A.Run the cluster in a different VPC and connect through VPC peering.
+B.Create a database user inside the Amazon Redshift cluster only for users on the network.
+C.Define a cluster security group for the cluster that allows access from the allowed networks.
+D.Only allow access to networks that connect with the shared services network via VPN.
+
+10) A Solutions Architect is designing an online shopping application running in a VPC on EC2 instances behind an ELB Application Load Balancer.The instances run in an Auto Scaling group across multiple Availability Zones. The application tiermust read and write data to a customer managed database cluster. There should be no access to the database from the Internet, but the cluster must be able to obtain software patches from the Internet.Which VPC design meets these requirements?
+
+A.Public subnets for both the application tier and the database cluster.
+B.Public subnets for the application tier, and private subnets for the database cluster.
+C.Public subnets for the application tier and NAT Gateway, and private subnets for the database cluster.
+D.Public subnets for the application tier, and private subnets for the database cluster and NAT Gateway.
+
+Answers
+
+6) C –Asingle EC2 instance will not scale and is a single point of failure in the architecture. A much better solution would be to have EC2 instances in an Auto Scaling group across 2 availability zones read messages from the queue. The other responses are all managed services that can be configured to scale or will scale automatically. For more information Click here
+
+7) B –Lifecycle configuration allows lifecycle management of objects in a bucket. The configuration is a set of one or more rules, where each rule defines an action for Amazon S3 to apply to a group of objects. Bucket policies and IAM define access to objects in an S3 bucket. CORS enables clients in one domain to interact with resources in a different domain.
+
+8) D –VPC endpoints for Amazon S3 provide secure connections to S3 buckets that do not require a gateway or NAT instances. NAT Gateways and Internet Gateways still route traffic over the Internet to the public endpoint for Amazon S3. There is no way to connect to Amazon S3 via VPN. For more information Click here
+
+9) C –A security group can grant access to traffic from the allowed networks via the CIDR range for each network. VPC peering and VPN are connectivity services and cannot control traffic for security. Amazon Redshift user accounts address authentication and authorization at the user level and have no control over network traffic. For more information Click here
+
+10) C –The online application must be inpublic subnets to allow access from clients’ browsers. The database cluster must be in private subnets to meet the requirement that there be no access from the Internet. For more information Click here

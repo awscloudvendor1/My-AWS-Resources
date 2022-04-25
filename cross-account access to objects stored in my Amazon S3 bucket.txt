@@ -1,0 +1,121 @@
+cross-account access to objects stored in my Amazon S3 bucket
+
+Use one of the following methods to grant cross-account access to objects that are stored in S3 buckets:
+
+Resource-based policies and AWS Identity and Access Management (IAM) policies for programmatic-only access to S3 bucket objects
+Resource-based Access Control List (ACL) and IAM policies for programmatic-only access to S3 bucket objects
+Cross-account IAM roles for programmatic and console access to S3 bucket objects
+Depending on the type of access that you want to provide, use one of the following solutions to grant granular cross-account access to objects stored in S3 buckets. In the following examples, you grant access to users in another AWS account (Account B) so that users can manage objects that are in an S3 bucket owned by your account (Account A).
+
+Resolution
+Resource-based policies and IAM policies
+Use bucket policies to manage cross-account control and audit the S3 object's permissions. If you apply a bucket policy at the bucket level, you can define who can access (Principal element), which objects they can access (Resource element), and how they can access (Action element). Applying a bucket policy at the bucket level allows you to define granular access to different objects inside the bucket. You can also review the bucket policy to see who can access objects in an S3 bucket. To use bucket policies to manage S3 bucket access, follow these steps:
+
+1.    Create an S3 bucket in Account A.
+
+2.    Create an IAM role or user in Account B.
+
+3.    Give the IAM role or user in Account B permission to download (GET Object) and upload (PUT Object) objects to and from a specific S3 bucket with this IAM policy. This policy also gives the IAM role or user in Account B permissions to call PUT Object acl to grant object permissions to the bucket owner:
+
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+  "s3:PutObject",
+  "s3:PutObjectAcl"
+            ],
+            "Resource": "arn:aws:s3:::AccountABucketName/*"
+
+        }
+    ]
+}
+Note: You can limit access to a specific bucket folder in Account A by defining the folder name in the resource element, such as "arn:aws:s3:::AccountABucketName/FolderName/*". For more information, see How can I use IAM policies to grant user-specific access to specific folders?
+
+4.    Configure the bucket policy for Account A to grant permissions to the IAM role or user that you created in Account B. Use this bucket policy to grant a user the permissions to GetObject and PutObject for objects in a bucket owned by Account A:
+
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::AccountB:user/AccountBUserName"
+            },
+            "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:PutObjectAcl"
+            ],
+            "Resource": [
+                "arn:aws:s3:::AccountABucketName/*"
+            ]
+        }
+    ]
+}
+
+
+
+Cross-account IAM roles
+
+To use cross-account IAM roles to manage S3 bucket access, follow these steps:
+
+1.    Create an IAM role in Account A. Then, grant the role permissions to perform required S3 operations. In the role's trust policy, grant a role or user from Account B permissions to assume the role in Account A:
+
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::AccountB:user/AccountBUserName"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+
+Note: If only programmatic access is required, the first two statements in the following policy can be removed:
+
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+                "s3:ListAllMyBuckets"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:s3:::*"
+            ]
+        },
+        {
+            "Action": [
+                "s3:ListBucket",
+                "s3:GetBucketLocation"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:s3:::AccountABucketName"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:PutObject"
+            ],
+            "Resource": "arn:aws:s3:::AccountABucketName/*"
+        }
+    ]
+}
+2.    Grant an IAM role or user in Account B permissions to assume the IAM role that you created in Account A.
+
+{
+  "Version": "2012-10-17",
+  "Statement": {
+    "Effect": "Allow",
+    "Action": "sts:AssumeRole",
+    "Resource": "arn:aws:iam::AccountA:role/AccountARole"
+  }
+}

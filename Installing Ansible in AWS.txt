@@ -1,0 +1,22 @@
+Installing Ansible in AWS
+
+1) Launch RedHat 8 
+2) yum install python3 -y
+3) python3 --version
+4) alternatives --set python /usr/bin/python3
+5) python --version
+6) yum -y install python3-pip
+7) useradd ansadmin
+passwd ansadmin
+8) visudo ---> go to the end of the file ---> type ansadmin and same priviledge as ec2-user
+9) vi /etc/ssh/sshd_config and enable passwordauthentication yes
+10) service sshd reload
+11) su - ansadmin
+12) pip3 install ansible --user
+13) ansible --version
+14) sudo mkdir /etc/ansible
+15) cd /etc/ansible 
+16) vi hosts ---> localhost
+17) ssh-keygen
+18) ssh-copy-id localhost
+19) ansible all -m ping

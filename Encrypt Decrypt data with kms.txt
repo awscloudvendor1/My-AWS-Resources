@@ -1,0 +1,20 @@
+How to Encrypt/Decrypt Data with KMS | Customer Master Key | Server Side Encryption | SSE-S3
+
+1) aws kms create-key
+2)  aws kms create-alias --alias-name "alias/kms-demo" --target-key-id "type the new created key id"
+3) touch test_file.txt
+   Welcome to AWS Zeedup Technologies.
+4) cat test_file.txt
+5) aws kms encrypt --key-id "alias/kms-demo" --plaintext fileb://test_file.txt --output text
+6) aws kms encrypt --key-id "alias/kms-demo" --plaintext fileb://test_file.txt --output text --query CipherBlob | base64 --decode > encrypted_test_file
+7) Refresh the mobaxterm user will get another file
+8) more encrypted_test_file
+9) aws s3 cp test_file.txt s3://aws1010 --sse  aws:kms --sse-kms-key-id give the key id
+10) Decrypting (aws kms decrypt --ciphertext-blob fileb://encrypted_test_file --output text --query Plaintext)
+11) aws kms decrypt --ciphertext-blob fileb://encrypted_test_file --output text --query Plaintext | base64 --decode > decrypted_test_file.txt
+12) ll
+13) diff test_file.txt decrypted_test_file.txt
+14) if the key is disabled user cant download the file in the s3 bucket
+    aws kms disable-key --key-id "type the key id"
+15) Download the s3 file it will not allow
+16) aws kms scheduled-key-deletion --key-id "type the key id"

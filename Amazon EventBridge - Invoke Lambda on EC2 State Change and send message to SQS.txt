@@ -1,0 +1,31 @@
+Amazon EventBridge - Invoke Lambda on EC2 State Change and send message to SQS
+
+1) Launch an any instance
+2) Go to SQS and Create a queue = Ec2states and select the standard queue
+3) Create a Lambda function
+   Name = Ec2instancestates
+   Runtime - Node.js
+   Permissions = Create a new role with basic lambda functions
+4) Type the code below under the (exports.handler)
+   console.log('Event Info:' , JSON.stringify(event));
+   console.log('Event Info Detail:', JSON.stringify(event.detail));
+   console.log('Instance State:', JSON.stringify(event.detail.state));
+  
+     const response = {
+            body: JSON.stringify('This message was sent when the instance was ') + JSON.stringify(event.detail.state),
+   
+     };
+     return response;
+
+    };
+
+5) Add the destination select Asynchronous invocation ---> on success ---> Destination Type (SQS) and select the queue
+6) Go to the EventBridge and create and select ---> Event pattern ---> pre-defined pattern by service 
+   service provider ---> select AWS ---> Event matching pattern ---> Ec2 instance state change notification ---> select all the states---> Any instances
+7) Select the target lambda fucntions and select the rule 
+8) Now stop the Ec2 instance and check in the cloudwatch and SQS
+
+
+
+
+

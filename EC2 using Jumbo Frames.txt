@@ -1,0 +1,55 @@
+EC2 using Jumbo Frames - Maximum Transmission Unit (MTU)
+
+The maximum transmission unit (MTU) of a network connection is the size, in bytes, of the largest
+permissible packet that can be passed over the connection. The larger the MTU of a connection, the
+more data that can be passed in a single packet. Ethernet packets consist of the frame, or the actual
+data you are sending, and the network overhead information that surrounds it.
+
+You can configure your applications to use bigger frames to take advantage of this feature and improve
+your application performance. All Amazon EC2 instance types support 1500 MTU, and many current
+instance sizes support 9001 MTU, or jumbo frames.
+
+Steps:
+1) Create a Cloudformation template as i alreasy created save
+2) Rename the 2 instances
+3) Launch the instances server B and Server A
+4) Go to the server B and check the default MTU 1500 by testing tracepath google.com
+5)run the below commands and check the MTU and set the MTU
+sudo ip link set dev eth0 mtu 1500 (i am setting 1500 now later i will change the MTU)
+ip link show eth0
+6)Go to server A and create a file and size 2G (fallocate -l 2G /home/ec2-user/test.img)
+7) Copy the test.img file to the Server B from Server A
+8) Copy the ssh Key of the Server A in Server B and give the proper permissions (chmod 700)
+9) Provide the Below scp and ssh configurations (replace the ip address and provide the ip address of
+server A)
+
+Send some data
+You can use scp or rsync to copy the data. I have already copied the private key(tmp.key) to allow me to securely copy the data between the machines
+
+pcksFile="/sys/class/net/eth0/statistics/rx_packets"
+nbPcks=`cat $pcksFile`
+# scp -i tmp.key ec2-user@10.13.0.126:/home/ec2-user/test.img /home/ec2-user/
+rsync -a --info=progress2 \
+    -e "ssh -i tmp.key" \
+    ec2-user@10.13.0.126:/home/ec2-user/test.img \
+    /home/ec2-user/
+echo $(expr `cat $pcksFile` - $nbPcks)
+
+10) After copying check the Bytes of MTU 1500 (it will be more in bytes)
+11) Again delete the test.img file and set the MTU less than that and again run the below command
+
+sudo ip link set dev eth0 mtu 9001
+ip link show eth0
+
+pcksFile="/sys/class/net/eth0/statistics/rx_packets"
+ nbPcks=`cat $pcksFile`
+ # scp -i tmp.key ec2-user@10.13.0.126:/home/ec2-user/test.img /home/ec2-user/
+ rsync -a --info=progress2 \
+     -e "ssh -i tmp.key" \
+     ec2-user@10.13.0.126:/home/ec2-user/test.img \
+     /home/ec2-user/
+ echo $(expr `cat $pcksFile` - $nbPcks)
+
+12) Note down the how many packets sent and compare the previous one (This gives 6x
+more faster performance than the old one)
+

@@ -1,0 +1,43 @@
+Fetching and Finding  date and time of stopped ec2 instance
+
+python 3.8
+Add the below permissions in the lambda IAM role
+AWSLambdaBasicExecutionRole
+
+"""
+-*- coding: utf-8 -*-
+========================
+AWS Lambda
+========================
+Created by: Paul (Zeedup Technologies)
+========================
+"""
+
+import json
+import boto3
+import re
+
+def lambda_handler(event, context):
+    client = boto3.client("ec2")
+    # s3 = boto3.client("s3")
+
+    # fetch information about all the instances
+    status = client.describe_instances()
+
+    print(status)
+    print("*" * 10)
+    
+    
+    for i in status["Reservations"]:
+        instance_details = i['Instances'][0]
+        if instance_details["State"]["Name"].lower() in ["shutting-down", "stopped", "stopping", "terminated"]:
+            print("InstanceId: ", instance_details["InstanceId"])
+            print("Launch time: ", instance_details["LaunchTime"])
+            print("State change reason: ", instance_details["StateTransitionReason"])
+            print("State change Time: ", re.findall('\((.*?) *\)', instance_details["StateTransitionReason"]))
+            print("\n")
+    
+    return {
+        'statusCode': 200,
+        'body': json.dumps('Thanks!')
+    }

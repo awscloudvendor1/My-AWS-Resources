@@ -1,0 +1,155 @@
+Amazon AWS EBS Backup via Lambda and CloudWatch
+
+The goal is to backup the EBS volume via AWS lambda and CloudWatch , we will do it two way ; One will be done in 1 Min interval ( using the Lambda function and another one using the Cloudwatch with 5 mins Interval)
+
+Step 1) Right Now I have two EC2 machines and I have two Volume on the left side .
+
+Step 2) When I go to snapshot on the left side I do not see anything
+
+Step 3) In order to create a function ; I need to create a Role and in order to create a Role I need to create a Policy
+
+Step 4) Go to IAM and on left side click create a policy and then click Jason and copy and paste this code in here ( we will see what these code do inside the Lambda )
+
+Step 5)
+
+{
+
+    “Version”: “2012-10-17”,
+
+    “Statement”: [
+
+        {
+
+            “Action”: [
+
+                “cloudwatch:DeleteAlarms”,
+
+                “cloudwatch:DescribeAlarmHistory”,
+
+                “cloudwatch:DescribeAlarms”,
+
+                “cloudwatch:DescribeAlarmsForMetric”,
+
+                “cloudwatch:GetMetricStatistics”,
+
+                “cloudwatch:ListMetrics”,
+
+                “cloudwatch:PutMetricAlarm”,
+
+                “ec2:CreateSnapshot”,
+
+                “ec2:ModifySnapshotAttribute”,
+
+                “ec2:ResetSnapshotAttribute”,
+
+                “ec2:Describe*”,
+
+                “logs:CreateLogGroup”,
+
+                “logs:CreateLogStream”,
+
+                “logs:PutLogEvents”,
+
+                “iam:GetRole”,
+
+                “iam:ListRoles”,
+
+                “lambda:*”
+
+            ],
+
+            “Resource”: “*”,
+
+            “Effect”: “Allow”
+
+        }
+
+    ]
+
+}
+
+Step 6) Click Review Policy and give name BackupEC2policy
+
+Step 7) Go to Role on the left side and then Pick Lambda , click next for Permission ; then search for above policy you created ; go to next page ( no Tag) then click Review and then give name BackupEC2Role
+
+Step 8) Now we will go to Lambda and use above Role
+
+Step 9) Give the name BackupEC2 ; chose Runtime Python 3.6 ;then pick chose exiting Role; the chose BackupEC2Roles , then Create a function
+
+Step 10) On next page we will see on the right side what is shown ( this come from Policy that we created before)
+
+Step 11) Now I will go copy and paste the Function code inside it and make sure save it
+
+import json
+
+import boto3
+
+# Setting ec2 client.
+
+ec2 = boto3.client(‘ec2’)
+
+# Our lambda handler function!
+
+def lambda_handler(event, context):
+
+    # Printing event received.
+
+    # print(“Received event: ” + json.dumps(event, indent=2))
+
+    # Let’s go ahead and print the rule arn to the logs so we know they are different!
+
+    rule_name = event[‘resources’]
+
+    print(rule_name)
+
+    # Setting the variable to loop through later.
+
+    # Filtering by only looking for ‘in-use’ EBS volumes.
+
+    total_ebs = ec2.describe_volumes(Filters=[{‘Name’: ‘status’, ‘Values’: [‘in-use’]}])
+
+    # Looping through and collecting all EBS volumes.
+
+    for volume in total_ebs[‘Volumes’]:
+
+     # Creating the snaphsot for all volumes within our region.
+
+        ec2.create_snapshot(VolumeId=volume[‘VolumeId’],Description=volume[‘Attachments’][0][‘InstanceId’])
+
+        print(“All done with volume: ” + volume[‘VolumeId’])
+
+
+Step 12) On the left side you will see the triggers ; in order to the Triggers I will go to CloudWatch first ( later on I will do another way) then   click on rule on the left side .
+
+Step 13)  click on Rule ; then Click create a Rule
+
+Step 14 )  Click the Schedule ; then choose 5 mins , then click on the Lambda function ; then pick backupEC2 , then give Name BackupEC25mins ; and
+
+Step 15) Now go back to your Lambda function ; and then on the left side you will see the CloudWatch as one of the tigers .
+
+
+Step 16) When you click on it , you will see 5 mins interval.
+
+Step 17 ) Now when I go to Snapshot ; I will see about 4 ( if it was more than 5 mins) , Now I will disable this Triggers and I will delete the Snapshot ; then I will configure the Triger within inside of the Lambda Functions.
+
+Step 18) Also when you go to Lambda function at Bottom; you will see two invocations 
+
+ 
+
+Step 19) Now  I will create a Trigger inside the Lambda   and I will pick Cloud Watch ;then click rule ; ( as we see we have the rule from last steps) then Click new Rule ; and , give rule name 
+
+BackupEC2_1mins , then give description “ This will back up every one min.” , click schedule expression , then type “rate(1 minute)”
+
+Step 20) Now make sure it is enable and click Add 
+
+Step 21) Now you will see number two next to CloudWatch Events , You will see one enable and one is disable
+
+Step 22) after one more min, when you go back to snapshot; you should see the snapshot of the volume,
+
+Step 23) now if you go to CloudWatch you should see new events in here too.
+
+Step 24) now when you go to CloudWatch ; then you will see all the logs and all the events that has been created.
+
+Step 25) make sure disable the Tigger (cloud watch) and delete all the EBS volume.
+
+ 

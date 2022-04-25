@@ -1,0 +1,14 @@
+Amazon EventBridge - Schedule an AWS Lambda Function
+
+
+1) Go to Lambda function
+2) Type the function Name = ScheduledLambda
+3) Runtime = Node.js
+4) Execution role = create a new role with basic Lambda permissions
+5) Copy the code below exports.handler = async (event) => {
+   console.log('Scheduled Lambda was called');
+   console.log('Event Details:', JSON.stringify(event));
+};
+6) save
+7) Scheduled in Amazon event bridge
+

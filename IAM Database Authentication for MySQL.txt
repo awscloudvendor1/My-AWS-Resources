@@ -1,0 +1,86 @@
+IAM Database Authentication for MySQL
+
+Amazon RDS for MySQL you can authenticate using AWS Identity and Access Management (IAM) database authentication. With this authentication method, you don't need to use a password when you connect to a DB instance. Instead, you use an authentication token.
+
+An authentication token is a unique string of characters that Amazon RDS generates on request. Authentication tokens are generated using AWS Signature Version 4. Each token has a lifetime of 15 minutes. You don't need to store user credentials in the database, because authentication is managed externally using IAM. You can also still use standard database authentication.
+
+Pre-Requisites
+
+EC2 Instance
+AWS CLI Installed - Get help here
+MySQL RDS Instance - Get help here
+MySQL Version - 5.7.17
+Ensure IAM DB authentication is enabled
+EC2 and RDS should be able to communicate with each other at port RDS port( For MySQL 3306 )
+IAM RoleName: ec2-to-rds: An EC2 Role. Get help here
+Permissions: Managed Policies AmazonRDSFullAccess
+
+Prepare EC2 Instance
+Install the following packages and commands
+
+yum install curl mysql -y
+service mysqld start
+chkconfig mysqld on
+
+Setup Database to use IAM
+We will now create a database user account that uses an AWS authentication token
+
+# Connect to DB
+RDS_HOST="db-with-iam-support.ct5b4uz1gops.eu-central-1.rds.amazonaws.com"
+REGION="eu-central-1"
+# mysql -h {database or cluster endpoint} -P {port number database is listening on} -u {master db username} -p
+mysql -h ${RDS_HOST} -P 3306 -u dbuser -p
+
+Run this command to create a database user account that will use an AWS authentication token instead of a password:
+
+CREATE USER 'db_iam_user' IDENTIFIED WITH AWSAuthenticationPlugin as 'RDS';
+
+Optionally, run this command to require the user to connect to the database using SSL
+
+GRANT USAGE ON *.* TO 'db_iam_user'@'%'REQUIRE SSL;
+Run the “exit” command to close MySQL
+
+IAM Inline Policy
+Inline Policy to allow the db access to user, Change the db arn accordingly
+
+{
+    "Version": "2012-10-17",
+    "Statement": [
+       {
+          "Effect": "Allow",
+          "Action": [
+              "rds-db:connect"
+          ],
+          "Resource": [
+              "arn:aws:rds-db:eu-central-1:111111111111:dbuser:db-RWXD2T7YIWZU4VI2FBHSM2GE24/db_iam_user"
+          ]
+       }
+    ]
+}
+
+
+Download SSL Certificates
+Download the AWS RDS Certificate pem file,
+
+mkdir -p /var/mysql-certs/
+cd /var/mysql-certs/
+curl -O https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem
+
+
+Generate an AWS authentication token
+The authentication token consists of several hundred characters. It can be unwieldy on the command line. One way to work around this is to save the token to an environment variable, and then use that variable when you connect.
+
+TOKEN="$(aws rds generate-db-auth-token --hostname ${RDS_HOST} --port 3306 --region ${REGION} --username db_iam_user)"
+
+Connect to Database
+mysql --host="${RDS_HOST}" \
+      --port=3306 \
+      --user=db_iam_user \
+      --ssl-ca=/var/mysql-certs/rds-combined-ca-bundle.pem \
+      --ssl-verify-server-cert \
+      --enable-cleartext-plugin \
+      --password="$TOKEN"
+
+
+
+

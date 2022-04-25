@@ -1,0 +1,56 @@
+Install Cloudwatch unified agent on EC2 instance
+
+1) Create required IAM role with **CloudWatchAgentServerPolicy**.
+
+2) Launch an EC2 instance and associate the created policy. (AmiLinux 2)
+
+3) Login to the instance
+
+4) Find the required cloudwatch agent download link:
+
+https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/download-cloudwatch-agent-commandline.html
+choose the AMILinux link and download
+yum install httpd -y
+service httpd start
+chkconfig httpd on
+check the site
+wget download the link
+
+5) Download the Cloudwatch Unified Agent. Find the right agent link for your OS by visiting the above link
+
+wget https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm
+
+
+
+6) Install the Cloudwatch Agent
+
+sudo rpm -U ./amazon-cloudwatch-agent.rpm 
+sudo rpm -U ./amazon-cloudwatch-agent.rpm(Rerun the command check the installation)
+cd /var/log/httpd/
+cat access_log
+open the default site in browser and refresh (it will catched in a access_log file)
+
+
+
+7) Configure the Cloudwatch agent with the help of a setup wizard:
+
+
+sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-config-wizard
+1,1,1,2,2,1,2,1,2,1(json),1,2,1 (Log file path= /var/www/access_log), Log group name (enter), Log stream name (enter), 2,2 
+
+
+Choose all the default option except don't install statd and collectd. Selecy **YES** when asked to collect Memory Utilization metric.  Select **NO** when asked if you want to monitor log files.
+
+8) Start the agent
+
+
+sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/bin/config.json -s
+
+it will be redirected to /bin/systemctl restart amazon-cloudwatch-agent.service
+
+/bin/systemctl status amazon-cloudwatch-agent.service (check the status)
+
+9) We have configured the cloudwatch metrics now.
+
+Refresh the cloudwatch console and also refresh the test page of AmiLinux2 and u will receive the metrics
+

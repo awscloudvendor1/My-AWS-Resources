@@ -1,0 +1,406 @@
+AMI LifeCycle Management Using EC2 Systems Manager Automation
+
+Select the Region Frankfut
+
+ 
+1) Launch an instance and provide the access key and secret key
+2) aws ssm put-parameter --name /GoldenAMI/Linux/RedHat-7/source --value "ami-c86c3f23" --type String (Execute the command and in ami section need to give the latest ami-id of the instance)
+3)aws ssm put-parameter --name /GoldenAMI/Linux/RedHat-7/latest --value "to-be-updated" --type String 
+4) Now go to the paramater store of the ssm and refresh and check the values 
+5) Go to IAM create role and select lambda role select AWSLambdaExecute and AmazonSSMFullAccess save as lambda-ssm-role
+6) Go to IAM create role and select Ec2 role select AmazonEC2RoleforSSM and save as a ManagedInstanceRole
+7) Go to IAM Create role and select Ec2 role select AmazonssmAutomationRole and save as a AutomationServiceRole
+8) go to AutomationServiceRole and create an inline policy:
+
+    {
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": "iam:PassRole",
+            "Resource": "arn:aws:iam::YOUR-ACCOUNT-NUMBER:role/YOUR-ManagedInstanceRole-name" (need to provide the ARN of the ManagedInstanceRole)
+        }
+    ]
+}
+
+save as Allow-ssm-automation-assume-managed-instance-role and attach
+
+9) Trust Relationships: Make the below trust relationship to both the roles
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": [
+          "ec2.amazonaws.com",
+          "ssm.amazonaws.com"
+        ]
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+
+update the trust relationship policy in both roles (ManagedInstanceRole and AutomationServiceRole)
+
+10) Create a lambda function 
+
+  from __future__ import print_function
+
+import json
+import boto3
+
+print('Loading function')
+
+
+#Updates an SSM parameter
+#Expects parameterName, parameterValue
+def lambda_handler(event, context):
+    print("Received event: " + json.dumps(event, indent=2))
+
+    # get SSM client
+    client = boto3.client('ssm')
+
+    #confirm  parameter exists before updating it
+    response = client.describe_parameters(
+       Filters=[
+          {
+           'Key': 'Name',
+           'Values': [ event['parameterName'] ]
+          },
+        ]
+    )
+
+    if not response['Parameters']:
+        print('No such parameter')
+        return 'SSM parameter not found.'
+
+    #if parameter has a Descrition field, update it PLUS the Value
+    if 'Description' in response['Parameters'][0]:
+        description = response['Parameters'][0]['Description']
+        
+        response = client.put_parameter(
+          Name=event['parameterName'],
+          Value=event['parameterValue'],
+          Description=description,
+          Type='String',
+          Overwrite=True
+        )
+    
+    #otherwise just update Value
+    else:
+        response = client.put_parameter(
+          Name=event['parameterName'],
+          Value=event['parameterValue'],
+          Type='String',
+          Overwrite=True
+        )
+        
+    reponseString = 'Updated parameter %s with value %s.' % (event['parameterName'], event['parameterValue'])
+        
+    return reponseString
+
+Runtime should be Python 2.7 and give name as Automation-UpdateSsmParam type the code and save
+
+11) Create custom Automation Document
+
+i) go to ssm and select Documents and select create documents
+ii) change as a automation document and name is Bake-GoldenAMI-Linux
+iii) Remove the code as already pre-written and paste the below code:
+
+  {
+  "schemaVersion": "0.3",
+  "description": "Create a Golden AMI with Linux distribution packages(ClamAV) and Amazon software(SSM & Inspector). For details,see https://github.com/miztiik/AWS-Demos/tree/master/How-To/setup-ami-lifecycle-management-using-ssm",
+  "assumeRole": "{{AutomationAssumeRole}}",
+  "parameters": {
+    "SourceAmiId": {
+      "type": "String",
+      "description": "(Required) The source Amazon Machine Image ID.",
+      "default": "{{ssm:/GoldenAMI/Linux/RedHat-7/source}}"
+    },
+    "InstanceIamRole": {
+      "type": "String",
+      "description": "(Required) The name of the role that enables Systems Manager (SSM) to manage the instance.",
+      "default": "ManagedInstanceRole"
+    },
+    "AutomationAssumeRole": {
+      "type": "String",
+      "description": "(Required) The ARN of the role that allows Automation to perform the actions on your behalf.",
+      "default": "arn:aws:iam::{{global:ACCOUNT_ID}}:role/AutomationServiceRole"
+    },
+    "SubnetId": {
+      "type": "String",
+      "description": "(Required) The subnet that the created instance will be placed into.",
+      "default": ""
+    },
+    "TargetAmiName": {
+      "type": "String",
+      "description": "(Optional) The name of the new AMI that will be created. Default is a system-generated string including the source AMI id, and the creation time and date.",
+      "default": "GoldenAMI-RH-7_on_{{global:DATE_TIME}}"
+    },
+    "InstanceType": {
+      "type": "String",
+      "description": "(Optional) Type of instance to launch as the workspace host. Instance types vary by region. Default is t2.micro.",
+      "default": "t2.micro"
+    },
+    "PreUpdateScript": {
+      "type": "String",
+      "description": "(Optional) URL of a script to run before updates are applied. Default (\"none\") is to not run a script.",
+      "default": "none"
+    },
+    "PostUpdateScript": {
+      "type": "String",
+      "description": "(Optional) URL of a script to run after package updates are applied. Default (\"none\") is to not run a script.",
+      "default": ""
+    },
+    "IncludePackages": {
+      "type": "String",
+      "description": "(Optional) Only update these named packages. By default (\"all\"), all available updates are applied.",
+      "default": "all"
+    },
+    "ExcludePackages": {
+      "type": "String",
+      "description": "(Optional) Names of packages to hold back from updates, under all conditions. By default (\"none\"), no package is excluded.",
+      "default": "none"
+    },
+    "lambdaFunctionName": {
+      "type": "String",
+      "description": "(Required) The name of the lambda function. Default ('none') is to not run a script.",
+      "default": "Automation-UpdateSsmParam"
+    }
+  },
+  "mainSteps": [
+    {
+      "name": "launchInstance",
+      "action": "aws:runInstances",
+      "maxAttempts": 3,
+      "timeoutSeconds": 1200,
+      "onFailure": "Abort",
+      "inputs": {
+        "ImageId": "{{SourceAmiId}}",
+        "InstanceType": "{{InstanceType}}",
+        "SubnetId": "{{ SubnetId }}",
+        "UserData": "IyEvYmluL2Jhc2gNCg0KZnVuY3Rpb24gZ2V0X2NvbnRlbnRzKCkgew0KICAgIGlmIFsgLXggIiQod2hpY2ggY3VybCkiIF07IHRoZW4NCiAgICAgICAgY3VybCAtcyAtZiAiJDEiDQogICAgZWxpZiBbIC14ICIkKHdoaWNoIHdnZXQpIiBdOyB0aGVuDQogICAgICAgIHdnZXQgIiQxIiAtTyAtDQogICAgZWxzZQ0KICAgICAgICBkaWUgIk5vIGRvd25sb2FkIHV0aWxpdHkgKGN1cmwsIHdnZXQpIg0KICAgIGZpDQp9DQoNCnJlYWRvbmx5IElERU5USVRZX1VSTD0iaHR0cDovLzE2OS4yNTQuMTY5LjI1NC8yMDE2LTA2LTMwL2R5bmFtaWMvaW5zdGFuY2UtaWRlbnRpdHkvZG9jdW1lbnQvIg0KcmVhZG9ubHkgVFJVRV9SRUdJT049JChnZXRfY29udGVudHMgIiRJREVOVElUWV9VUkwiIHwgYXdrIC1GXCIgJy9yZWdpb24vIHsgcHJpbnQgJDQgfScpDQpyZWFkb25seSBERUZBVUxUX1JFR0lPTj0idXMtZWFzdC0xIg0KcmVhZG9ubHkgUkVHSU9OPSIke1RSVUVfUkVHSU9OOi0kREVGQVVMVF9SRUdJT059Ig0KDQpyZWFkb25seSBTQ1JJUFRfTkFNRT0iYXdzLWluc3RhbGwtc3NtLWFnZW50Ig0KIFNDUklQVF9VUkw9Imh0dHBzOi8vYXdzLXNzbS1kb3dubG9hZHMtJFJFR0lPTi5zMy5hbWF6b25hd3MuY29tL3NjcmlwdHMvJFNDUklQVF9OQU1FIg0KDQppZiBbICIkUkVHSU9OIiA9ICJjbi1ub3J0aC0xIiBdOyB0aGVuDQogIFNDUklQVF9VUkw9Imh0dHBzOi8vYXdzLXNzbS1kb3dubG9hZHMtJFJFR0lPTi5zMy5jbi1ub3J0aC0xLmFtYXpvbmF3cy5jb20uY24vc2NyaXB0cy8kU0NSSVBUX05BTUUiDQpmaQ0KDQppZiBbICIkUkVHSU9OIiA9ICJ1cy1nb3Ytd2VzdC0xIiBdOyB0aGVuDQogIFNDUklQVF9VUkw9Imh0dHBzOi8vYXdzLXNzbS1kb3dubG9hZHMtJFJFR0lPTi5zMy11cy1nb3Ytd2VzdC0xLmFtYXpvbmF3cy5jb20vc2NyaXB0cy8kU0NSSVBUX05BTUUiDQpmaQ0KDQpjZCAvdG1wDQpGSUxFX1NJWkU9MA0KTUFYX1JFVFJZX0NPVU5UPTMNClJFVFJZX0NPVU5UPTANCg0Kd2hpbGUgWyAkUkVUUllfQ09VTlQgLWx0ICRNQVhfUkVUUllfQ09VTlQgXSA7IGRvDQogIGVjaG8gQVdTLVVwZGF0ZUxpbnV4QW1pOiBEb3dubG9hZGluZyBzY3JpcHQgZnJvbSAkU0NSSVBUX1VSTA0KICBnZXRfY29udGVudHMgIiRTQ1JJUFRfVVJMIiA+ICIkU0NSSVBUX05BTUUiDQogIEZJTEVfU0laRT0kKGR1IC1rIC90bXAvJFNDUklQVF9OQU1FIHwgY3V0IC1mMSkNCiAgZWNobyBBV1MtVXBkYXRlTGludXhBbWk6IEZpbmlzaGVkIGRvd25sb2FkaW5nIHNjcmlwdCwgc2l6ZTogJEZJTEVfU0laRQ0KICBpZiBbICRGSUxFX1NJWkUgLWd0IDAgXTsgdGhlbg0KICAgIGJyZWFrDQogIGVsc2UNCiAgICBpZiBbWyAkUkVUUllfQ09VTlQgLWx0IE1BWF9SRVRSWV9DT1VOVCBdXTsgdGhlbg0KICAgICAgUkVUUllfQ09VTlQ9JCgoUkVUUllfQ09VTlQrMSkpOw0KICAgICAgZWNobyBBV1MtVXBkYXRlTGludXhBbWk6IEZpbGVTaXplIGlzIDAsIHJldHJ5Q291bnQ6ICRSRVRSWV9DT1VOVA0KICAgIGZpDQogIGZpIA0KZG9uZQ0KDQppZiBbICRGSUxFX1NJWkUgLWd0IDAgXTsgdGhlbg0KICBjaG1vZCAreCAiJFNDUklQVF9OQU1FIg0KICBlY2hvIEFXUy1VcGRhdGVMaW51eEFtaTogUnVubmluZyBVcGRhdGVTU01BZ2VudCBzY3JpcHQgbm93IC4uLi4NCiAgLi8iJFNDUklQVF9OQU1FIiAtLXJlZ2lvbiAiJFJFR0lPTiINCmVsc2UNCiAgZWNobyBBV1MtVXBkYXRlTGludXhBbWk6IFVuYWJsZSB0byBkb3dubG9hZCBzY3JpcHQsIHF1aXR0aW5nIC4uLi4NCmZp",
+        "MinInstanceCount": 1,
+        "MaxInstanceCount": 1,
+        "IamInstanceProfileName": "{{InstanceIamRole}}"
+      }
+    },
+    {
+      "name": "updateOSSoftware",
+      "action": "aws:runCommand",
+      "maxAttempts": 3,
+      "timeoutSeconds": 3600,
+      "onFailure": "Abort",
+      "inputs": {
+        "DocumentName": "AWS-RunShellScript",
+        "InstanceIds": [
+          "{{launchInstance.InstanceIds}}"
+        ],
+        "Parameters": {
+          "commands": [
+            "set -e",
+            "[ -x \"$(which wget)\" ] && get_contents='wget $1 -O -'",
+            "[ -x \"$(which curl)\" ] && get_contents='curl -s -f $1'",
+            "eval $get_contents https://aws-ssm-downloads-{{global:REGION}}.s3.amazonaws.com/scripts/aws-update-linux-instance > /tmp/aws-update-linux-instance",
+            "chmod +x /tmp/aws-update-linux-instance",
+            "/tmp/aws-update-linux-instance --pre-update-script '{{PreUpdateScript}}' --post-update-script '{{PostUpdateScript}}' --include-packages '{{IncludePackages}}' --exclude-packages '{{ExcludePackages}}' 2>&1 | tee /tmp/aws-update-linux-instance.log"
+          ]
+        }
+      }
+    },
+    {
+      "name": "installCustomizations",
+      "action": "aws:runCommand",
+      "maxAttempts": 3,
+      "timeoutSeconds": 600,
+      "onFailure": "Abort",
+      "inputs": {
+        "DocumentName": "AWS-RunShellScript",
+        "InstanceIds": [
+          "{{launchInstance.InstanceIds}}"
+        ],
+        "Parameters": {
+          "commands": [
+            "curl -O http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm",
+            "rpm -ivh epel-release-latest-7.noarch.rpm",
+            "yum -y install httpd",
+            "systemctl enable httpd",
+            "systemctl restart httpd",
+            "sudo yum --enablerepo=epel install -y clamav",
+            "yum-config-manager --disable epel",
+            "cat /etc/motd >> /var/www/html/index.html",
+            "echo 'Welcome' >> /var/www/html/index.html",
+            "cat > /etc/motd <<- EOF",
+            "           __  __ _                 _                        _   _             ",
+            "     /\\   |  \\/  (_)     /\\        | |                      | | (_)            ",
+            "    /  \\  | \\  / |_     /  \\  _   _| |_ ___  _ __ ___   __ _| |_ _  ___  _ __  ",
+            "   / /\\ \\ | |\\/| | |   / /\\ \\| | | | __/ _ \\| '_ ` _ \\ / _` | __| |/ _ \\| '_ \\ ",
+            "  / ____ \\| |  | | |  / ____ \\ |_| | || (_) | | | | | | (_| | |_| | (_) | | | |",
+            " /_/    \\_\\_|  |_|_| /_/    \\_\\__,_|\\__\\___/|_| |_| |_|\\__,_|\\__|_|\\___/|_| |_|",
+            "   ",
+            "   ",
+            "EOF"
+          ]
+        }
+      }
+    },
+    {
+      "name": "installInspectorAgent",
+      "action": "aws:runCommand",
+      "maxAttempts": 3,
+      "timeoutSeconds": 600,
+      "onFailure": "Abort",
+      "inputs": {
+        "DocumentName": "AmazonInspector-ManageAWSAgent",
+        "InstanceIds": [
+          "{{launchInstance.InstanceIds}}"
+        ],
+        "Parameters": {
+          "Operation": "Install"
+        }
+      }
+    },
+    {
+      "name": "installUnifiedCloudWatchAgent",
+      "action": "aws:runCommand",
+      "maxAttempts": 3,
+      "timeoutSeconds": 600,
+      "onFailure": "Abort",
+      "inputs": {
+        "DocumentName": "AWS-ConfigureAWSPackage",
+        "InstanceIds": [
+          "{{launchInstance.InstanceIds}}"
+        ],
+        "Parameters": {
+          "name": "AmazonCloudWatchAgent",
+          "action": "Install"
+        }
+      }
+    },
+    {
+      "name": "stopInstance",
+      "action": "aws:changeInstanceState",
+      "maxAttempts": 3,
+      "timeoutSeconds": 1200,
+      "onFailure": "Abort",
+      "inputs": {
+        "InstanceIds": [
+          "{{launchInstance.InstanceIds}}"
+        ],
+        "DesiredState": "stopped"
+      }
+    },
+    {
+      "name": "createImage",
+      "action": "aws:createImage",
+      "maxAttempts": 3,
+      "onFailure": "Abort",
+      "inputs": {
+        "InstanceId": "{{launchInstance.InstanceIds}}",
+        "ImageName": "{{TargetAmiName}}",
+        "NoReboot": true,
+        "ImageDescription": "AMI Generated by EC2 Automation on {{global:DATE_TIME}} from {{SourceAmiId}}"
+      }
+    },
+    {
+      "name": "createEncryptedCopy",
+      "action": "aws:copyImage",
+      "maxAttempts": 3,
+      "onFailure": "Abort",
+      "inputs": {
+        "SourceImageId": "{{createImage.ImageId}}",
+        "SourceRegion": "{{global:REGION}}",
+        "ImageName": "Encrypted-{{TargetAmiName}}",
+        "ImageDescription": "Encrypted GoldenAMI by SSM Automation on {{global:DATE_TIME}} from source AMI {{createImage.ImageId}}",
+        "Encrypted": true
+      }
+    },
+    {
+      "name": "createTagsForEncryptedImage",
+      "action": "aws:createTags",
+      "maxAttempts": 1,
+      "onFailure": "Continue",
+      "inputs": {
+        "ResourceType": "EC2",
+        "ResourceIds": [
+          "{{createEncryptedCopy.ImageId}}"
+        ],
+        "Tags": [
+          {
+            "Key": "Automation-Id",
+            "Value": "{{automation:EXECUTION_ID}}"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Mystique"
+          },
+          {
+            "Key": "SourceAMI",
+            "Value": "{{SourceAmiId}}"
+          },
+          {
+            "Key": "Amazon-Inspector",
+            "Value": "true"
+          },
+          {
+            "Key": "Amazon-SSM",
+            "Value": "true"
+          },
+          {
+            "Key": "Encrypted",
+            "Value": "true"
+          }
+        ]
+      }
+    },
+    {
+      "name": "updateSsmParam",
+      "action": "aws:invokeLambdaFunction",
+      "timeoutSeconds": 1200,
+      "maxAttempts": 1,
+      "onFailure": "Abort",
+      "inputs": {
+        "FunctionName": "Automation-UpdateSsmParam",
+        "Payload": "{\"parameterName\":\"/GoldenAMI/Linux/RedHat-7/latest\", \"parameterValue\":\"{{createEncryptedCopy.ImageId}}\"}"
+      }
+    },
+    {
+      "name": "terminateInstance",
+      "action": "aws:changeInstanceState",
+      "maxAttempts": 3,
+      "onFailure": "Continue",
+      "inputs": {
+        "InstanceIds": [
+          "{{launchInstance.InstanceIds}}"
+        ],
+        "DesiredState": "terminated"
+      }
+    },
+    {
+      "name": "deleteUnEcryptedImage",
+      "action": "aws:deleteImage",
+      "maxAttempts": 3,
+      "timeoutSeconds": 180,
+      "onFailure": "Abort",
+      "inputs": {
+        "ImageId": "{{createImage.ImageId}}"
+      }
+    }
+  ],
+  "outputs": [
+    "createImage.ImageId"
+  ]
+}
+
+select create document and user can view the document in the section of owned by me and type the name of the rule and change the instance type skip t2.micro
+
+12) now select the option Automations and select execute automations and select the option Owner and select the created document and click execute automations
+
+
+
+
+
+

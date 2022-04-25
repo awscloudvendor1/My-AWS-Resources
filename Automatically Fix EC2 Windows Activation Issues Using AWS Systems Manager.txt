@@ -1,0 +1,11 @@
+Automatically Fix EC2 Windows Activation Issues Using AWS Systems Manager
+
+
+1) Launch the windows server 2012 and check for the activation is updated or not
+2) Go to IAM roles and click roles and Ec2 ---> Amazonec2roleforssm
+3) Attach the created role to the ec2 instance which have the activation issues
+4)Go to system manager check the instances are detected in the system manager and select ---> Automations --> ExecuteAutomations 
+5) and select type Document name prefix:Equals = AWSsupport-ActivatewindowswithamazonLicense
+6) Select the ec2 instance which have the activations problems
+7) Click ---> ExecuteAutomations
+8) EC2 windows instance will be getting activated 

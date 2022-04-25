@@ -1,0 +1,42 @@
+IAM policies to grant user-specific access to specific folders
+
+Single-user policy - This example policy allows a specific IAM user to see specific folders at the first level of the bucket and then to take action on objects in the desired folders and subfolders. This example uses an IAM user named David and a bucket named my-company with the following structure:
+
+/home/Adele/
+/home/Bob/
+/home/David/
+/restricted/
+/root-file.txt
+
+
+{
+ "Version":"2012-10-17",
+ "Statement": [
+   {
+     "Sid": "AllowUserToSeeBucketListInTheConsole",
+     "Action": ["s3:ListAllMyBuckets", "s3:GetBucketLocation"],
+     "Effect": "Allow",
+     "Resource": ["arn:aws:s3:::*"]
+   },
+  {
+     "Sid": "AllowRootAndHomeListingOfCompanyBucket",
+     "Action": ["s3:ListBucket"],
+     "Effect": "Allow",
+     "Resource": ["arn:aws:s3:::my-company"],
+     "Condition":{"StringEquals":{"s3:prefix":["","home/"],"s3:delimiter":["/"]}}
+    },
+   {
+     "Sid": "AllowListingOfUserFolder",
+     "Action": ["s3:ListBucket"],
+     "Effect": "Allow",
+     "Resource": ["arn:aws:s3:::my-company"],
+     "Condition":{"StringLike":{"s3:prefix":["home/David/*"]}}
+   },
+   {
+     "Sid": "AllowAllS3ActionsInUserFolder",
+     "Effect": "Allow",
+     "Action": ["s3:*"],
+     "Resource": ["arn:aws:s3:::my-company/home/David/*"]
+   }
+ ]
+}

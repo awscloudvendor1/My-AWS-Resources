@@ -1,0 +1,26 @@
+Connect a public-facing ELB to Ec2 instance that have private ip address
+
+1) Create a VPC with 1 public and 1 private subnet
+2) Keep the both public and private subnets in the same AZ
+3) Assign the nat Gateway Elastic ip address and create a VPC 
+4) Create a ELB (classic Load balancer) and select the VPC
+5) Keep the load balancer in the public subnet and remove the private subnet 
+6) Create a new security group with port no 80 enabled
+7) create a ELB without any instance added
+8) Create 2 Ec2 instances (Amilinux) and Keep the 2 instance in the private subnet and disable the auto assign public ip option
+9) Attach the below userdata script
+#!/bin/bash
+yum install httpd -y
+chkconfig httpd on
+echo $HOSTNAME> /var/www/html/index.html
+chown apache /var/www/html/index.html
+/etc/init.d/httpd start
+
+10) Attach the instance with the default security groups
+11) Launch the 2 private instances and click ELB and add the instances 
+12) Click on the actions button click edit security groups and select the both security groups(default and also SG which is created for the ELB) 
+13) Instance will pass the health test after 5 minutes
+
+Conclusion:
+
+we can have 2 apache web servers running on ec2 instances which are not exposes to web behind the public ELB  

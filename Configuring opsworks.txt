@@ -1,0 +1,37 @@
+ Configuring OpsWorks
+
+https://docs.aws.amazon.com/opsworks/latest/userguide/welcome_classic.html
+https://github.com/arpansolanki/opsworks-demo
+
+opsworks-demo/recipes/default.rb
+
+#https://learn.chef.io/modules/learn-the-basics/ubuntu/bring-your-own-system/configure-a-package-and-service#/
+apt_update 'Update the apt cache daily' do
+  frequency 86_400
+  action :periodic
+end
+
+package 'apache2'
+
+service 'apache2' do
+  supports status: true
+  action [:enable, :start]
+end
+
+template '/var/www/html/index.html' do
+  source 'index.html.erb'
+end
+
+
+Add stack
+select chef stack
+https://github.com/arpansolanki/opsworks-demo.git
+
+Add a layer
+Opsworks = webserver
+Click receipes = opsworks_demo::default  
+security = select the security groups (Make sute port 80 is opened) 
+select instances = webserver1
+add 2 more instances = time based, load based
+click on the instance and view the logs
+add apps and give the URL and deploy

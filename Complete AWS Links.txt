@@ -1,0 +1,385 @@
+https://github.com/miztiik/s3-crr-with-kms-encryption
+(S3 Cross Region Replication with KMS Encrypted Objects)
+
+https://github.com/nasha2878
+https://github.com/srcecde
+
+https://github.com/Cloud-Yeti
+https://github.com/avizway1/aws-labs
+https://github.com/miztiik/security-automation-monitor-users-with-excessive-privileges
+https://github.com/miztiik/serverless-monitor-for-unused-iam-roles
+https://github.com/miztiik/security-incident-response-instance-isolation
+https://github.com/miztiik/security-automation-remediate-unintended-iam-access
+https://github.com/miztiik/security-automation-respond-to-failed-ssh-access
+https://github.com/miztiik/security-automation-remediate-unintended-s3-object-acl
+https://github.com/miztiik/security-automation-remediate-weak-s3-policy
+https://github.com/miztiik/attribute-based-access-control-ec2
+https://github.com/pavants52/DevOpsDocs?files=1
+https://github.com/awslabs/aws-cloudformation-templates/tree/master/aws/services
+
+https://github.com/miztiik/aws-real-time-use-cases
+https://github.com/miztiik/dev-sec-ops/tree/master/reference-urls
+https://github.com/miztiik/dev-sec-ops/tree/master/content-filtering-with-proxy
+https://github.com/miztiik/dev-sec-ops/tree/master/automate-cloudtrail-monitoring-alerting-enabling
+https://github.com/miztiik/dev-sec-ops/tree/master/AWS-SecretsManager-Lambda-RDS
+https://github.com/yankils/Simple-DevOps-Project
+https://github.com/miztiik/improve-ec2-performance
+https://github.com/miztiik/cdk-demos
+https://github.com/miztiik/dev-sec-ops/tree/master/rotate-recover-ec2-ssh-keys
+https://github.com/miztiik/dev-sec-ops/tree/master/nacl-outbound-ephemeral-ports
+https://github.com/miztiik/serverless-s3-event-processor
+https://github.com/miztiik/dev-sec-ops/tree/master/remove-unused-security-groups
+https://github.com/miztiik/serverless-cloudwatch-log-retention
+
+https://github.com/miztiik/elk-stack/tree/master/ElasticSearch
+
+https://github.com/miztiik/serverless-kms-key-rotator
+https://github.com/miztiik/serverless-kms-key-rotator/blob/master/kms-data-key-encrypt-decrypt.md
+(AWS KMS Key Encrypt & Decrypt with Data Key)
+https://github.com/miztiik/serverless-kms-key-rotator/blob/master/kms-encrypt-decrypt-rotate.md
+
+https://clip4all.com/channel.php?channelid=UC_evcfxhjjui5hChhLE08tQ
+(Valaxy aws)https://github.com/miztiik/AWS-demos/tree/master/How-To/setup-s3-event-sns-notification
+Configuring AWS S3 Event Notifications | Notify SNS Topics through Email
+
+https://github.com/miztiik/AWS-Demos/tree/master/How-To/setup-user-data-to-execute-after-initial-launch
+(Execute user data after the initial launch of my EC2 instance)
+
+https://github.com/miztiik/serverless-cloudwatch-log-retention
+(AWS Serverless CloudWatch Logs Retention Policy Enforcer)
+
+https://github.com/miztiik/serverless-s3-event-processor
+(AWS S3 Real Time Event Processor)
+
+https://github.com/miztiik/migrate-from-github-to-codecommit
+(Migrate from Github to AWS CodeCommit)
+
+https://github.com/miztiik/lex-faq-bot
+(AWS Lex Chat Bot)
+
+http://isoredirect.centos.org/centos/7/isos/x86_64/CentOS-7-x86_64-Everything-1810.iso
+(Centos Images)
+
+https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/nodejs-getstarted.html
+(ElasticBean Stalk config)
+
+https://github.com/arpansolanki?tab=repositories
+(Arpan solanki)
+
+https://github.com/awslabs/aws-config-rules/tree/master/python
+(AWS Demos AWS Config)
+
+(https://github.com/miztiik/setup-aws-code-commit)
+Welcome to AWS Code Commit
+
+(https://github.com/miztiik/aws-config-tag-enforcement)
+AWS Config for TAG Enforcement
+
+https://github.com/miztiik/serverless-sg-sentry
+Automatically revert changes to Security Groups With CloudTrail, CloudWatch Events & AWS Lambda
+
+https://github.com/miztiik/serverless-ami-replicator
+Lambda Cross Region EC2 AMI Copy - AMI Based Disaster Recovery | Serverless Automation
+
+https://github.com/miztiik/Serverless-AMI-Baker
+(Serverless AmiBacker Taking backups on the time)
+
+https://github.com/miztiik/serverless-cloudwatch-logs-exporter
+(Serverless Cloudwatch Logs To S3 Exporter)
+
+https://github.com/miztiik/setup-aws-code-commit
+(AWS Code Commit)
+
+https://github.com/ValaxyTech/DevOpsDemos/tree/master/Jenkins
+(Devops Demos)
+
+(https://github.com/miztiik/serverless-s3-to-elasticsearch-ingester)
+Serverless S3 To Elasticsearch Ingester
+
+https://github.com/miztiik/serverless-kms-sentry
+(Serverless KMS Sentry)
+
+https://github.com/miztiik/serverless-s3-to-elasticsearch-ingester
+(Serverless S3 To Elasticsearch Ingester)
+
+https://github.com/miztiik/serverless-backup
+(Serverless EBS Volume Snapshots using Lambda Functions)
+
+https://github.com/miztiik/AWSDemos/blob/aaa658d56c00eda38def4536a1e6cfee610a9e08/How-To/setups3-cli-from-ec2/README.md
+Working with s3 commands
+
+https://github.com/miztiik/serverless-ebs-penny-pincher
+(Lambda Serverless Automation | Clean Up Unused or UnTagged EBS Volumes to save cost)
+
+https://github.com/miztiik/AWS-demos/tree/master/How-To/setupssm-hybrid-environment
+(Hybrid Cloud Environment)
+
+https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-initialize.html (Initializing Amazon EBS Volumes after taking snapshot volume due to slowness)
+
+AWS S3 Bucket Security - Restrict Privileges to User using IAM Policy | Grant User Access
+(https://github.com/miztiik/AWS-Demos/blob/master/IAMPolicies/s3policyToAllowAccessSingleBucket.json)
+
+https://github.com/miztiik/serverless-s3-to-elasticsearch-ingester
+(Serverless S3 To Elasticsearch Ingester)
+
+https://github.com/miztiik/Cloudfoundry-AWS-Cloudformation
+(Cloudformation complete data)
+
+Configuring s3fs
+(https://github.com/s3fs-fuse/s3fs-fuse.git)
+sudo yum install automake fuse fuse-devel gcc-c++ git libcurl-devel libxml2-devel make openssl-devel -y
+
+https://github.com/miztiik/serverless-image-processor
+(Serverless-image-processor)
+
+https://github.com/open-guides/og-aws
+(AWS Complete Notes)
+
+https://github.com/miztiik/serverless-janitor-ebs-snapshots
+Serverless | Automatically Remove old or unused EBS Snaphots |
+Create & Deploy Lambda Functions
+
+https://github.com/miztiik/serverless-iam-key-sentry
+Serverless IAM Access Key Rotation | Identify Old Access Keys |
+
+Use Lambda to secure AWS
+https://github.com/miztiik/AWS-Demos/tree/master/How-To/setupcustom-kms
+AWS Custom KMS | Import Custom Key or your Secrets into KMS | Encrypt data with custom key
+
+[ec2-user]# yum -y install stress
+stress --cpu 4 --timeout 300
+[ec2-user]# poweroff
+
+https://aws.amazon.com/premiumsupport/knowledge-center/#ec2
+
+https://github.com/miztiik/AWS-Demos/tree/master/How-To/setup-ssh-key-recovery-using-userdata
+(Recover Lost SSH Key in EC2 using UserData)
+
+https://github.com/miztiik/AWS-Demos/tree/master/How-To/setup-s3-cli-from-ec2
+
+Recovering EC2 instance from getting failure 
+aws configure
+aws cloudwatch set-alarm-state --alarm-name "HW-Check" --statevalue ALARM --state-reason "Simulate an EC2 HW system Failure"
+https://github.com/miztiik/AWS-Demos/tree/master/How-To/setupaws-cli (Aws Automations1.1)
+
+pip install boto3
+https://github.com/miztiik/AWS-Demos/blob/master/How-To/setup-iam-with-boto3/README.md (AWS Automation 1.2)
+
+https://raw.githubusercontent.com/miztiik/AWS-Demos/master/HowTo/setup-vpc-flow-logs/setup-vpc-flow-logs-monitor.py (Aws
+Automations1)
+
+cloudformation
+https://github.com/miztiik/AWS-Demos/blob/master/How-To/setup-cloudformation-webserver/cf-vpc-ec2-webserver.template
+
+Cross region replication between 2 buckets in different aws accounts
+https://github.com/miztiik/AWS-Demos/tree/master/How-To/setup-s3-bucket-copy-across-accounts
+
+https://aws.amazon.com/premiumsupport/knowledge-center/copy-s3-buckets-lambda/ (copy objects between S3 buckets using Lambda)
+
+https://github.com/miztiik/Serverless-GuardDuty-Findings-To-SNS
+(SQS)
+
+https://github.com/andrewpuch/aws-sqs-node-js-examples
+(SES)
+
+https://github.com/miztiik/AWS-Demos/tree/master/How-To/setup-sftp-for-s3
+(SFTP Service for Amazon S3)
+
+https://github.com/andrewpuch/aws-ses-node-js-examples
+(S3 Security - Uploading Objects Using Pre-Signed URLs)
+
+https://github.com/miztiik/AWS-Demos/tree/master/How-To/setuppre-signed-s3-urls)
+(Delegate Access Across AWS Accounts Using IAM Roles)
+
+https://github.com/miztiik/AWS-Demos/tree/master/How-To/setupcross-account-iam-roles
+(Setup S3 as a filesystem)
+
+https://github.com/miztiik/AWS-Demos/tree/master/How-To/setup-s3-
+block-storage-filesystem
+(AMI LifeCycle Management Using EC2 Systems Manager | Automation)
+
+https://github.com/miztiik/AWS-Demos/tree/master/How-To/setupami-lifecycle-management-using-ssm
+(Create Amazon EFS File System and Mount it on EC2 Instance(s)
+
+https://github.com/miztiik/AWS-Demos/tree/master/How-To/setupElasticFileSystem-on-ec2
+(AWS API Gateway Demo)
+
+https://github.com/miztiik/AWS-Demos/tree/master/How-To/setupapi-gw
+(AWS ElasticSearch with Logstash(in EC2)
+
+https://github.com/miztiik/AWS-Demos/tree/master/How-To/setupelasticsearch-logstash
+(IAM Database Authentication for MySQL)
+
+https://github.com/miztiik/AWS-Demos/tree/master/How-To/setupiam-access-to-rds
+(Setup Amazon Elasticsearch Service Manual Index Snapshots)
+
+https://github.com/miztiik/AWS-Demos/tree/master/How-To/setupmanual-elasticsearch-snapshots#setup-amazon-elasticsearchservice-manual-index-snapshots
+(How-To setup your first AWS VPC Peering)
+
+https://github.com/miztiik/AWS-Demos/tree/master/How-To/setupvpc-peering
+(Security in Amazon RDS - Using SSL to Encrypt Connection to DB)
+
+https://github.com/miztiik/AWS-Demos/tree/master/How-To/setupssl-connection-to-rds
+aws-cleanup
+
+regain admin access to an Amazon EC2 Windows instance 
+(https://docs.amazonaws.cn/en_us/AWSEC2/latest/WindowsGuide/ec2rw-ssm.html)
+
+importing keys material into the AWS
+(https://aws.amazon.com/premiumsupport/knowledge-center/import-keys-kms/)
+
+(https://github.com/miztiik/aws-cleanup)
+(Serverless Janitor for Amazon Machine Images(AMI)
+
+https://github.com/miztiik/serverless-janitor-for-AMI
+(Serverless AMI Baker)
+
+https://github.com/miztiik/serverless-AMI-Baker
+(AWS Study)
+
+https://github.com/agasthik/aws-csa-2017
+(AWS Complete Notes)
+
+https://github.com/vaquarkhan/Aws-Solution-Architect-Notes
+(AWS Notes2)
+
+https://gist.github.com/nmrony/173ef44bc2655266b005fed8b21f4b4d
+(AWS Notes3)
+
+https://clip4all.com/channel.php?channelid=UC_evcfxhjjui5hChhLE08tQ
+(Valaxy aws)
+
+https://github.com/bnriiitb/aws-notes
+(AWS Notes4)
+
+https://github.com/Reybolt/aws-certified-developer-associateudemy-notes
+(AWS Complete Complete Notes)
+
+https://github.com/durgeshlingarkar/aws-solution-architectassociate
+(AWS Important Notes)
+
+https://github.com/sandyydk/AWS_Solutions_Architect_Associate_
+2018
+(AWS IAM)
+
+https://gist.github.com/davejamesmiller/90f292d2d9a21bac5f6116296
+fa64657
+(AWS Scripts)
+
+https://github.com/deanwilson/aws-scripts
+(aws-shell - The interactive productivity booster for the AWS
+CLI)
+
+https://github.com/awslabs/aws-shell
+(AWS Powerfull)
+
+https://github.com/wallix/awless
+(AWS Tools for managing instances)
+
+https://github.com/wbailey/claws
+(AWS Security Resources)
+
+https://gist.github.com/chanj/6c48c059ad4b72a60bf3
+
+https://drive.google.com/file/d/1Ai82pBzIgqFC90
+_nl5FJ59JKwsCKmFlg/view
+(site Link)
+
+https://aws-tutorials.blogspot.com/2018/06/aws-lambda-clean-youraws-account-with-python.html
+
+https://github.com/miztiik/AWS-Demos/tree/master/How-To/setupssh-key-recovery-using-userdata
+(Recover Lost SSH Key in EC2 using UserData)
+
+https://github.com/miztiik/AWS-Demos/tree/master/How-To/setupiam-access-to-rds
+4(IAM Database Authentication for MySQL)
+
+https://github.com/miztiik/AWS-Demos/tree/master/How-To/setupami-lifecycle-management-using-ssm
+(AMI LifeCycle Management Using EC2 Systems Manager | Automation)
+
+https://github.com/miztiik/AWS-Demos/tree/master/How-To/setupcross-cccount-iam-roles
+(Delegate Access Across AWS Accounts Using IAM Roles)
+
+https://github.com/miztiik/AWS-Demos/tree/master/How-To/setupnat-to-allow-internet-for-private-instances
+(Why do i need NAT Instances)
+
+https://github.com/miztiik/AWS-Demos/tree/master/How-To/setup-s3-
+block-storage-filesystem
+(s3fs file system)
+
+https://github.com/miztiik/AWS-Demos/tree/master/How-To/setup-s3-
+cli-from-ec2
+(s3 bucket demos)
+
+https://github.com/miztiik/AWS-Demos/tree/master/How-To/setupuser-data-to-execute-after-initial-launch
+(Execute user data after the initial launch of my EC2 instance)
+
+https://github.com/aws-samples/amazon-guardduty-hands-on
+(Guardduty findings)
+
+https://github.com/aws-samples/aws-sns-samples
+(Amazon SNS - Code Samples)
+
+https://github.com/aws-samples/serverless-data-analytics
+(serverless-data-analytics)
+
+https://github.com/aws-samples/amazon-efs-tutorial
+(EFS File system)
+
+https://github.com/aws-samples/aws-trainingdemo/tree/master/course/architecting
+(AWS Architecture)
+
+https://github.com/awsdocs/aws-cli-user-guide/blob/master/docsource/using-s3-commands.md
+(Using High-Level s3 Commands with the AWS Command Line
+Interface)
+
+https://github.com/aws-samples/aws-trainingdemo/blob/master/course/system_operations/chef/chef-solo-admininstance.json
+(chef-solo-admin-instance.json)
+
+5https://github.com/pietheinstrengholt/aws-certified-solutionsarchitect-associate-exam-tips
+
+https://github.com/NigelEarle/AWS-CSA-Notes-2018
+
+https://github.com/ziwon/aws-csa/tree/master/udemy-aws-certifiedsolutions-architect-associate
+
+https://github.com/ravsau/aws-labs/blob/master/enable-passwordssh.MD
+
+https://github.com/miztiik/Devops-Demos/tree/master/setup-jenkins
+
+https://github.com/miztiik/DevOps-Demos/tree/master/setup-jenkins-plugins
+
+https://github.com/miztiik/DevOps-Demos/tree/master/setup-jenkins-slave
+
+https://github.com/miztiik/AWS-Demos/tree/master/How-To/setup-ssh-key-recovery-using-userdata
+
+https://github.com/miztiik/AWS-Demos/tree/master/How-To/setup-user-data-to-execute-after-initial-launch
+
+https://github.com/andrewpuch/nagios_setup
+
+https://github.com/keithweaver/python-aws-s3
+
+https://github.com/boto/boto
+
+https://github.com/widdix/aws-ec2-ssh
+
+https://github.com/miztiik/AWS-Demos/tree/master/How-To/setup-iam-access-to-rds
+
+https://github.com/valaxytech/devopsdemos/tree/master/docker/docker_installation_steps
+
+https://github.com/ValaxyTech/DevOpsDemos/tree/master/Docker
+
+Python Scripting and AWS Automation with Python
+(https://github.com/PythonAwsBoto3/AWS/edit/master/git_in.py)
+
+https://github.com/agasthik/aws-csa-2017#backups
+
+https://github.com/Apjo/AWSAssociateSolutionsArchitectNotes
+
+https://github.com/pietheinstrengholt/aws-certified-solutions-architect-associate-exam-tips
+
+https://github.com/aws-samples/amazon-guardduty-hands-on
+
+https://github.com/aws-samples(AWS Project samples)
+
+https://github.com/aws/
+
+

@@ -1,0 +1,53 @@
+Short Description
+By default, user data scripts and cloud-init directives run only during the first boot cycle when an instance is launched. However, you can configure your user data script and cloud-init directives with a mime multi-part file. A mime multi-part file allows your script to override how frequently user data is executed in the cloud-init package. Then, the file executes the user script.
+Resolution
+Warning: Before starting this procedure, be aware of the following:
+
+Stopping and restarting the instance erases any data on instance store volumes. Be sure that you back up any data on the instance store volume that you want to keep. For more information, see Determining the Root Device Type of your AMI.
+Stopping and restarting the instance changes the public IP address of your instance. It's a best practice to use an Elastic IP address instead of a public IP address when routing external traffic to your instance.
+
+1.    Make sure that the latest version of cloud-init is installed and functioning properly on your EC2 instance.
+
+2.    For security reasons, create an IAM policy to restrict the users who are allowed to add or remove user data through the ModifyInstanceAttribute API.
+
+3.    Open the Amazon EC2 console.
+
+4.    Stop your instance.
+
+5.    Choose Actions, choose Instance Settings, and then choose View/Change User Data.
+
+6.    Copy your user script into the View/Change User Data dialog box, and then choose Save.
+
+The following example is a shell script that writes "Hello World" to a testfile.txt file in a /tmp directory.
+
+Content-Type: multipart/mixed; boundary="//"
+MIME-Version: 1.0
+
+--//
+Content-Type: text/cloud-config; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment; filename="cloud-config.txt"
+
+#cloud-config
+cloud_final_modules:
+- [scripts-user, always]
+
+--//
+Content-Type: text/x-shellscript; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment; filename="userdata.txt"
+
+#!/bin/bash
+/bin/echo "Hello World" >> /tmp/testfile.txt
+--//
+
+
+By default, cloud-init allows only one content type in user data at a time. However, this example shows both text/cloud-config and text/x-shellscript content-types in a mime-multi part file.
+
+The text/cloud-config content type overrides how frequently user data is executed in the cloud-init package by setting the SCRIPTS-USER parameter to ALWAYS.
+
+The text/x-shellscript content type provides the actual user script to be executed by the cloud-init cloud_final_modules module. In this case, there is only one line to be executed, which is '/bin/echo "Hello World." >> /tmp/testfile.txt'. Replace this line with the shell script that you want to execute during the instance boot.
+
+7.    Start your EC2 instance again, and validate that the /tmp/testfile.txt file is created.

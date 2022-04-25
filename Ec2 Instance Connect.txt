@@ -1,0 +1,38 @@
+Ec2 Instance Connect
+
+1) Launch the Ec2 instance without the keypair (AmiLinux 2)
+2) Launch Another ec2 instnace via Keypair (AmiLinux 1)
+3) Create an IAM user with the programmtic access and connect with the AWS CLI
+4) Check the user access
+
+     aws sts get-caller-identity
+
+5) Update the Json 
+
+    {
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2-instance-connect:SendSSHPublicKey"
+            ],
+            "Resource": [
+                "arn:aws:ec2:$REGION:$ACCOUNTID:instance/*"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "ec2:osuser": "ec2-user"
+                }
+            }
+        }
+    ]
+}
+
+6) Create a Keypair
+
+    ssh-keygen -t rsa -f mynew_key 
+
+7) Access the Instance
+
+aws ec2-instance-connect send-ssh-public-key --region us-east-1 --instance-id i-0989ec3292613a4f9 --availability-zone us-east-1f --instance-os-user ec2-user --ssh-public-key file://mynew_key.pub

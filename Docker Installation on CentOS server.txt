@@ -1,0 +1,17 @@
+Docker Installation on CentOS server
+
+1) sudo yum install -y yum-utils \
+  device-mapper-persistent-data \
+  lvm2
+
+2) sudo yum-config-manager \
+   --add-repo \
+   https://download.docker.com/linux/centos/docker-ce.repo
+
+3)  yum install docker-ce
+
+4) systemctl start docker
+
+5) docker run hello-world
+
+6) docker ps -a

@@ -1,0 +1,76 @@
+
+   Configuring S3 Glacier
+
+ 1) Create a vault in AWS S3 Glacier
+ 2) Check the SNS Notifications
+ 
+
+ Create a Vault
+aws glacier create-vault --vault-name namevault --account-id - 
+
+ Upload Archives to a vault
+
+ create a dir name glacier 
+ Create a two files = one.txt and Two.txt
+
+aws glacier upload-archive --account-id - --valult-name namvault --body one.txt
+aws glacier upload-archive --account-id - --valult-name namvault --body two.txt
+
+ Initiate Job to retrieve archive inventory of a vault
+
+ Create a json file and type the below and save it as a inventory-retrieval
+ 
+{
+"Type": "inventory-retrieval"
+}
+
+ aws glacier initiate-job --account-id - --vault-name namvault --job-parameters file://inventory-retrieval.json
+
+
+ initiate job to retreive an archive from a vault
+
+ aws glacier initiate-job --account-id  --vault-name namvault --job-parameters file://job-archive-retrieval.json
+
+ Create a json file and type the below and save it as a job-archive-retrieval
+
+ {
+"Type": "archive-retrival"
+"ArchiveId": Id of the one.txt file which is given by the glacier "  " (copy and paste that id here)
+"Description": "Job for one.txt"
+}
+
+
+List all Active jobs
+
+aws glacier list-jobs --account-id - --vault-name namvault
+
+Describe an active job
+
+aws glacier describe-job --account-id - --vault-name namvault --job-id (type thee name of the job-id)
+
+
+Get the job - Inventory Retrival
+
+aws glacier get-job-output --account-id - --vault-name namvault --job-id (copy the job id) and end of the id add the the line output.json
+
+Get the job - Archive Retrival
+
+aws glacier get-job-output --account-id - --vault-name namvault --job-id (copy the job id) and end of the id add the the line outone.txt
+
+
+Describe vaults
+
+aws glacier describe-vault --vault-name namvault --account-id -
+
+
+Delete an archive
+
+aws glacier delete-archive --account-id - --vault-name namvault --archive-id (type the archive id)
+
+Delete a vault
+
+aws glacier delete-vault --vault-name DemoGlacier --account-id -
+
+
+
+
