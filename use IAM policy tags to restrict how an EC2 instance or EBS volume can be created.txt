@@ -1,0 +1,154 @@
+How do I use IAM policy tags to restrict how an EC2 instance or EBS volume can be created
+
+Short Description
+You can specify tags for EC2 instances and EBS volumes as part of the API call that creates the resources. Using this principle, you can require users to tag specific resources by applying conditions to their IAM policy. The following example policies don't allow users to create security groups or key pairs, so users must select pre-existing security groups and key pairs. For information about creating security groups, see Creating Your First IAM Admin User and Group.
+
+The three following example IAM policies allow users to:
+
+Launch EC2 instances that have matching tag keys and values.
+Launch EC2 instances that have at least one matching tag and value.
+Launch EC2 instances that have at least one matching tag key.
+Resolution
+1.    Launch EC2 instances that have matching tag keys and values
+
+The following example policy allows a user to launch an EC2 instance and create an EBS volume only if the user applies all the tags that are defined in the policy using the qualifier ForAllValues. If the user applies any tag that's not included in the policy, then the action is denied. To enforce case sensitivity, use the condition aws:TagKeys.
+
+{
+  "Version": "2012-10-17",
+  "Statement": [{
+      "Sid": "AllowToDescribeAll",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:Describe*"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "AllowRunInstances",
+      "Effect": "Allow",
+      "Action": "ec2:RunInstances",
+      "Resource": [
+        "arn:aws:ec2:*::image/*",
+        "arn:aws:ec2:*::snapshot/*",
+        "arn:aws:ec2:*:*:subnet/*",
+        "arn:aws:ec2:*:*:network-interface/*",
+        "arn:aws:ec2:*:*:security-group/*",
+        "arn:aws:ec2:*:*:key-pair/*"
+      ]
+    },
+    {
+      "Sid": "AllowRunInstancesWithRestrictions",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:CreateVolume",
+        "ec2:RunInstances"
+      ],
+      "Resource": [
+        "arn:aws:ec2:*:*:volume/*",
+        "arn:aws:ec2:*:*:instance/*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestTag/key1": "value1",
+          "aws:RequestTag/key2": "value2"
+        },
+        "ForAllValues:StringEquals": {
+          "aws:TagKeys": [
+            "key1",
+            "key2"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "AllowCreateTagsOnlyLaunching",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:CreateTags"
+      ],
+      "Resource": [
+        "arn:aws:ec2:*:*:volume/*",
+        "arn:aws:ec2:*:*:instance/*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "ec2:CreateAction": "RunInstances"
+        }
+      }
+    }
+  ]
+}
+
+Important: To launch EC2 instances successfully, this policy must include matching tag keys and values. If the key and value pairs don't match, you might receive the error "Launch Failed" or similar type of API failure message.
+
+Example results
+
+Key/Value	                Result
+key1/value1 and key2/value2	allow
+KEY1/value1 and key2/value2	deny
+key1/value1	                deny
+key1/value2	                deny
+no keys and values	        deny
+
+
+2.    Launch EC2 instances that have at least one matching tag and value
+
+You can use the first policy example and replace the statement ID (Sid) "AllowRunInstancesWithRestrictions" to allow a user to launch an EC2 instance. Then, create an EBS volume if the user applies at least one specific tag using the following condition ForAnyValue:
+
+...
+            "Sid": "AllowRunInstancesWithRestrictions",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:CreateVolume",
+                "ec2:RunInstances"
+            ],
+            "Resource": [
+                "arn:aws:ec2:*:*:volume/*",
+                "arn:aws:ec2:*:*:instance/*"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "aws:RequestTag/key1": "value1"
+                },
+                "ForAnyValue:StringEquals": {
+                    "aws:TagKeys": [
+                        "key1"
+...
+
+Example results
+
+Key/Value	               Result
+key1/value1 and key2/value2	allow
+key1/value1	                allow
+key1/value2	                deny
+no keys and values	        deny
+
+3.    Launch EC2 instances that have at least one matching tag key
+
+You can use the first policy example and replace the Sid "AllowRunInstancesWithRestrictions" to allow a user to launch an EC2 instance. Then, create EBS volumes when the user applies at least one tag key named key1. No specific value is required in the following example policy:
+
+...
+        {
+            "Sid": "AllowRunInstancesWithRestrictions",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:CreateVolume",
+                "ec2:RunInstances"
+            ],
+            "Resource": [
+                "arn:aws:ec2:*:*:volume/*",
+                "arn:aws:ec2:*:*:instance/*"
+            ],
+            "Condition": {
+                "ForAnyValue:StringEquals": {
+                    "aws:TagKeys": [
+                        "key1"
+...
+
+Example results
+
+Key/Value	                Result
+key1/value1 and key2/value2	allow
+key1/value1	                allow
+key1/value2	                allow
+no keys and values	        deny

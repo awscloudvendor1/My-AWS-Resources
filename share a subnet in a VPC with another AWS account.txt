@@ -1,0 +1,16 @@
+share a subnet in a VPC with another AWS account
+
+Logging to the Master Account
+
+1) Create a Custom vpc in the region
+2) Open the RAM manager
+3) Go to settings ----> click Enable sharing within your AWS Orginizations
+4) Go to shared by me ---> Resource share
+5) Type the name = resourceshare
+6) In the Allow external accounts ---> give the Account id of the participant account
+7) Click the and select the resource share ----> click Modify
+8) Select the subnets and save changes
+9) Go to vpc of and select the subnet and click actions and share subnet and select the Resource name
+10) Go to participant account and check the subnets are shared
+11) Go the RAM Console in the participant account and see shared with me and click shared resources
+

@@ -1,0 +1,56 @@
+user permissions to connect to my EC2 Linux instance using SSH
+
+
+Short Description
+Pass a user data script to cloud-init that performs the following:
+
+1.    Creates a new user.
+
+2.    Sets the appropriate ownership and file permissions for the SSH directory and the files in it.
+
+3.    Appends the SSH public key to the authorized_keys file.
+
+Resolution
+Before you begin, note the following:
+
+Stopping and restarting the instance erases any data on instance store volumes. Be sure that you back up all instance store volumes that contain data that you want to keep. For more information, see Determining the Root Device Type of your AMI.
+Stopping and restarting the instance changes the public IP address of your instance. It's a best practice to use an Elastic IP address instead of a public IP address when routing external traffic to your instance.
+1.    Connect to your EC2 instance using SSH.
+
+2.    Run the following command to confirm that cloud-init is installed:
+
+sudo yum list installed cloud-init
+If cloud-init is not installed, run the following command to install it:
+sudo yum install cloud-init
+3.    Open the Amazon EC2 console and then select the instance.
+
+4.    Choose Actions, select Instance State, and then choose Stop.
+
+Note: If Stop is disabled, either the instance is already stopped or its root device is an instance store volume.
+
+5.    Retrieve the public key from the key pair.
+
+6.    Choose Actions, select Instance Settings, and then choose View/Change User Data.
+
+7.    Copy and paste the following script into the User Data field. Replace the following values:
+For username, enter the new user's user name.
+For ssh-rsa AB3nzExample, enter your public key.
+
+#cloud-config
+cloud_final_modules:
+- [users-groups,always]
+users:
+  - name: username -------> Type here the username
+    groups: [ wheel ]
+    sudo: [ "ALL=(ALL) NOPASSWD:ALL" ]
+    shell: /bin/bash
+    ssh-authorized-keys: 
+    - ssh-rsa AB3nzExample ----> copy and paste here the ssh public key
+
+Note: By default, cloud-init directives only execute when an instance is launched. However, when you use this user data script, cloud-init adds the public key to the instance every time the instance reboots or restarts. If you remove the user data script, then the default functionality is restored.
+
+8.    Choose Save.
+
+9.    Choose Actions, select Instance State, and then choose Start.
+
+10.    When the instance reaches the running state, log in as the new user. The new user has the same default behavior as the ec2-user.

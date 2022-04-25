@@ -1,0 +1,54 @@
+Tomcat installation on EC2 instance
+
+Launch the Instance
+AMILinux and open the port 8080 in the security groups
+
+Install Apache Tomcat
+Download tomcat packages from tomcat site
+
+
+# Create tomcat directory
+cd /opt
+wget http://mirrors.fibergrid.in/apache/tomcat/tomcat-8/v8.5.35/bin/apache-tomcat-8.5.35.tar.gz
+tar -xvzf  apache-tomcat-8.5.35.tar.gz
+mv apache-tomcat-8.5.35.tar.gz tomcat (Renaming)
+cd tomcat/
+cd bin
+./startup.sh 
+copy the public ip and browse the tomcat on 8080
+click manage app(it will block)
+find / -name context.xml
+select the /opt/tomcat/webapp$/manager/META-INF/context.xml
+vi /opt/tomcat/webapp$/manager/META-INF/context.xml
+go to the line <valve classname=org) and comment it
+<!--> begining of the line 
+--> end of the line ( near allows="127)
+do the same thing for other file also  /opt/tomcat/webapps/host-manager/META-INF (open this)
+<!--> begining of the line 
+--> end of the line ( near allows="127)
+./shutdown.sh
+cd /conf
+vi tomcat-users.xml
+go to the end of the line and paste the below
+<role rolename="manager-gui"/>
+ <role rolename="manager-script"/>
+ <role rolename="manager-jmx"/>
+ <role rolename="manager-status"/>
+ <user username="admin" password="admin" roles="manager-gui, manager-script, manager-jmx, manager-status"/>
+ <user username="deployer" password="deployer" roles="manager-script"/>
+ <user username="tomcat" password="s3cret" roles="manager-gui"/>
+go to cd ../bin/
+./shutdown.sh
+./startup.sh
+browse the public ip and the username and password id tomcat s3cret and access (user can login tomcat and access web app manager GUI)
+
+
+
+
+
+
+
+
+
+
+

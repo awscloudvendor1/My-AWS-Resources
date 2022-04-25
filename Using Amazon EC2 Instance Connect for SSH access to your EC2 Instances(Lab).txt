@@ -1,0 +1,58 @@
+https://aws.amazon.com/blogs/compute/new-using-amazon-ec2-instance-connect-for-ssh-access-to-your-ec2-instances/
+
+Using Amazon EC2 Instance Connect for SSH access to your EC2 Instances
+
+Connect to the instance using SSH. The instance is running a relatively recent version of Amazon Linux 2:
+[ec2-user@ip-10-1-0-15 ~]$ uname -srv
+Linux 4.14.104-95.84.amzn2.x86_64 #1 SMP Fri Jun 21 12:40:53 UTC 2019
+Use the yum command to install the ec2-instance-connect RPM package.
+
+$ sudo yum install ec2-instance-connect
+Loaded plugins: extras_suggestions, langpacks, priorities, update-motd
+Resolving Dependencies
+--> Running transaction check
+---> Package ec2-instance-connect.noarch 0:1.1-9.amzn2 will be installed
+--> Finished Dependency Resolution
+
+........
+
+Installed:
+  ec2-instance-connect.noarch 0:1.1-9.amzn2                                                                                                     
+
+Complete!
+
+Set up IAM users
+
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2-instance-connect:SendSSHPublicKey"
+            ],
+            "Resource": [
+                "arn:aws:ec2:$REGION:$ACCOUNTID:instance/*"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "ec2:osuser": "ec2-user"
+                }
+            }
+        }
+    ]
+}
+
+To connect with your SSH client
+Generate the new private and public keys mynew_key and mynew_key.pub, respectively:
+$ ssh-keygen -t rsa -f mynew_key 
+
+Use the following AWS CLI command to authorize the user and push the public key to the instance using the send-ssh-public-key command. To support this, you need the latest version of the AWS CLI.
+$ aws ec2-instance-connect send-ssh-public-key --region us-east-1 --instance-id i-0989ec3292613a4f9 --availability-zone us-east-1f --instance-os-user ec2-user --ssh-public-key file://mynew_key.pub
+{
+    "RequestId": "505f8675-710a-11e9-9263-4d440e7745c6", 
+    "Success": true
+} 
+
+ssh -i mynew_key ec2-user@ec2-34-204-200-76.compute-1.amazonaws.com
+

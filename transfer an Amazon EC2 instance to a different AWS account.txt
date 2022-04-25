@@ -1,0 +1,17 @@
+transfer an Amazon EC2 instance to a different AWS account
+
+1) Create an instance in AWS Account A Launch the instance
+2) echo "This is  me ec2"> ec2.txt
+   ls
+   cat ec2.txt
+3) Take the image of the server (InstanceA/OldAccount) 
+4) Send this image to another aws account as a private image and also send the snapshot
+5) Take the backup of the key
+   ssh-keygen -y -f name of the key > pubkey.txt
+6) Go to Target account go to keypair
+    import key pair ---> choose file ---> select the public key file name pubkey.txt
+7) Make sure we must be in the same region
+8) select the transferred image and launch as instance
+9) choose the keypai which transferred in account A
+10) See the same file 
+

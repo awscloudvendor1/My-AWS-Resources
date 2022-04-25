@@ -1,0 +1,65 @@
+set human-readable CloudWatch Events notifications for API calls using input transformers
+
+1) Create a cloud watch event
+Sample event
+
+{
+	"version": "0",
+	"id": "41dff147-cfbc-492a-9a98-9dd00d082417",
+	"detail-type": "AWS API Call via CloudTrail",
+	"source": "aws.ec2",
+	"account": "123456789012",
+	"time": "2017-07-14T16:36:23Z",
+	"region": "us-east-1",
+	"resources": [],
+	"detail": {
+		"eventVersion": "1.05",
+		"userIdentity": {
+			"type": "Root",
+			"principalId": "123456789012",
+			"arn": "arn:aws:iam::123456789012:root",
+			"accountId": "123456789012",
+			"accessKeyId": "ASIAIRP4G1234567891Q",
+			"userName": "iamuser",
+			"sessionContext": {
+				"attributes": {
+					"mfaAuthenticated": "false",
+					"creationDate": "2017-07-14T16:27:38Z"
+				}
+			}
+		},
+		"eventTime": "2017-07-14T16:36:23Z",
+		"eventSource": "ec2.amazonaws.com",
+		"eventName": "CreateSecurityGroup",
+		"awsRegion": "us-east-1",
+		"sourceIPAddress": "72.21.196.64",
+		"userAgent": "console.ec2.amazonaws.com",
+		"requestParameters": {
+			"groupName": "test",
+			"groupDescription": "test",
+			"vpcId": "vpc-54a4232d"
+		},
+		"responseElements": {
+			"_return": true,
+			"groupId": "sg-82d531f3"
+		},
+		"requestID": "a4609e55-69ac-4a2d-8057-843dc8b4658b",
+		"eventID": "7774b898-59c1-48a5-9c41-af1bcaa04612",
+		"eventType": "AwsApiCall"
+	}
+}
+
+select sns
+
+
+2.    For your rule's Target, choose Input Transformer under Configure input.
+
+3.    In the first input box, configure your Input Path. Include any key-value pairs to be used in your notification. Be sure to modify the following sample input path for your use case:
+
+{"sgname":"$.detail.requestParameters.groupName","sourceip":"$.detail.sourceIPAddress","vpcid":"$.detail.requestParam
+
+4.    In the second input box, configure the Input Template. Include a string with placeholders for values from your input path. This string is the human-readable text of your notification. Be sure to modify the following sample input template for your use case:
+
+"User <user>  has executed API call <action> from source IP <sourceip> on security group <sgid>/<sgname> that belongs to vpc <vpcid> in region <region> at time(UTC) <time>. The Request ID is <reqid>."
+
+create a security group and test it

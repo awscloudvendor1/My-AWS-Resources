@@ -1,0 +1,24 @@
+transfer file from ec2 instance to s3 bucket using lambda function.
+
+Follow the below steps:
+
+Create an IAM role with s3FullAccess and Ec2FullAccess
+
+Create a s3 bucket
+
+create a lambda function and try to run the below code.
+
+import json
+import boto3
+from pprint import pprint
+def lambda_handler(event, context):
+    client = boto3.client("ec2")
+    s3 = boto3.client("s3")
+    status = client.describe_instance_status(IncludeAllInstances = True)
+    s3.upload_file("/home/test/sample.txt","bucket_name","testbk1122/testing/")
+    return {
+        'statusCode': 200,
+        'body' : json.dumps('Hello from lambda')
+    }
+
+Make sure your EC2 instance is  in running status.

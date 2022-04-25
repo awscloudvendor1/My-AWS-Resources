@@ -1,0 +1,19 @@
+How can I upgrade my EC2 Windows Server 2012R2 instance OS to Windows Server 2016?
+
+
+1) Launch windows server 2012 os in any aws region
+2) Create an ami image of the windows server 2012
+3) Take a note of the instance id and the AZ
+4) Check you have the latest network drives run ---> appwiz.cpl ---> Check whether it have the AWS PV Drivers option ---> uninstall the EC2Configservice (it will also uninstall the ssmagent) and replace with EC2Launch
+5) Delete the files under the c:\programfiles\amazon\Ec2Configservice\SSM delete it and also in programdata
+6) install the EC2Launch from the Latest version of EC2Lunch Site
+
+https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2launch-download.html (install the Ec2Launch and also install install.ps1 file and run it)
+
+7) install the ssm agent 
+8) now go back to the windows server 2012 AWS console go to the snapshots and choose the public snapshots select the owner and select the amazonimages type description:windows 2016 English installation media and select choose actions create volume choose the AZ same as windows server 2012 running 
+9) attach the volume in the 2012 server 
+10) goto diskmgmt.msc and activate the disk
+11) gotopowershell cd d:\
+    ./setup.exe /auto upgrade
+  

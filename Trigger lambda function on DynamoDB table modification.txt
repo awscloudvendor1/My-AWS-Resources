@@ -1,0 +1,14 @@
+Trigger lambda function on DynamoDB table modification
+
+steps
+
+1) Create a table in the DynamoDB
+2) give the table name = LambdaTrigger and primary key = connection
+3) Go to IAM role and create Lambda role and add the permission AWSLambdaDynamoDBExecutioRole
+4) Create the lambda function ---> create function ---> name = dynamotrigger, select python 3.8
+5) select add trigger ---> select the dynamodb ---> select the dynamodb table which is created --> ADD
+6) Go back to the lamdbd code panel ---> add the below code and 
+    under the def lambda_handler
+    add the line of code = print(event) ---> save
+7) Go to Dynamodb and select the table and select create item ---> connection string: 123 (This should trigger the lambda function)
+8) add more itmes and check the events  and remove the items and check the events in cloudwatch

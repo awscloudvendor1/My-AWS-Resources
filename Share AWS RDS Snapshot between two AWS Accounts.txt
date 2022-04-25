@@ -1,0 +1,10 @@
+Share AWS RDS Snapshot between two AWS Accounts
+
+Steps
+1) create a RDS Oracle database Enterprise Database
+2) Take the snapshot of the database
+3) select the snapshot and actions---> select the share snapshot
+4) give the another account id but need to send the kms keys to another
+5) Copy the snapshot ans place it into the same region
+6) add another account and send the snapshots
+7) go to another account and user can see the snapshots

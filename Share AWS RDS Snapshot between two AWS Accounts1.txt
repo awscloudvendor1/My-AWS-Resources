@@ -1,0 +1,49 @@
+Share AWS RDS Snapshot between two AWS Accounts
+
+
+
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowUseOfTheKey",
+            "Effect": "Allow",
+            "Action": [
+                "kms:Encrypt",
+                "kms:Decrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+                "kms:DescribeKey"
+            ],
+            "Resource": [
+                "arn:aws:kms:us-east-1:AWS A/C ID:key/${KMS KEY ID}"
+            ]
+        },
+        {
+            "Sid": "AllowAttachmentOfPersistentResources",
+            "Effect": "Allow",
+            "Action": [
+                "kms:CreateGrant",
+                "kms:ListGrants",
+                "kms:RevokeGrant"
+            ],
+            "Resource": [
+                "arn:aws:kms:us-east-1:AWS A/C ID:key/${KMS KEY ID }"
+            ],
+            "Condition": {
+                "Bool": {
+                    "kms:GrantIsForAWSResource": true
+                }
+            }
+        },
+        {
+            "Sid": "AllowReencryptionOfNewCMK",
+            "Effect": "Allow",
+            "Action": [
+                "kms:ReEncryptTo*",
+                "kms:ReEncryptFrom*"
+            ],
+            "Resource": "*"
+        }
+    ]
+}

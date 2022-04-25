@@ -1,0 +1,31 @@
+Security in Amazon RDS - Using SSL to Encrypt Connection to DB
+
+1) Create the RDS database mysql and launch it
+2) connect the database with the Ec2 linux instance without a SSL Certificate
+3) After logging type \s and check its whether its encrypted or not (the databse is must be not encrypted)
+4) now run the database with the encrypted SSL
+   mysql -h oops.cyqsexlyiohn.eu-central-1.rds.amazonaws.com --ssl-ca=/home/ec2-user/rds-combined-ca-bundle.pem --ssl-mode=REQUIRED -u admin -P 3306 -p
+5) type \s and now check the database is encrypted
+6) SHOW SESSION STATUS LIKE 'Ssl_cipher';
+7) show status like 'Ssl%';
+8)  SELECT user FROM mysql.user;
+9)  CREATE USER 'encrypted_user'@'%' IDENTIFIED BY 'user';
+10) GRANT ALL PRIVILEGES ON onlyssldb.* TO 'encrypted_user'@'%' WITH GRANT OPTION;
+11) FLUSH PRIVILEGES;
+
+4) ALTER USER 'encrypted_user'@'%' REQUIRE SSL;
+Query OK, 0 rows affected (0.01 sec)
+
+5) FLUSH PRIVILEGES;
+
+Login to the user which is created 
+
+1) mysql -h oops.cyqsexlyiohn.eu-central-1.rds.amazonaws.com -P 3306 -u encrypted_user -p (make sure the user can access the database becoz of no ssl)
+2)  \s (user can see its not encrypted)
+Apply step no 4 and 5 in the base machine 
+6) mysql -h oops.cyqsexlyiohn.eu-central-1.rds.amazonaws.com -P 3306 -u encrypted_user -p (After applying the REQUIRED SSL option required otherwise user cant able to access the database without ssl)
+7) mkdir -p /var/mysql-certs/
+8) cd /var/mysql-certs/
+9) curl -O https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem
+10) mysql -h oops.cyqsexlyiohn.eu-central-1.rds.amazonaws.com --ssl-ca=/var/mysql-certs/rds-combined-ca-bundle.pem --ssl-mode=REQUIRED -u encrypted_user -P 3306 -p
+11) \s
