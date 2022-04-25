@@ -1,0 +1,15 @@
+manage Amazon EC2 instances which has no internet access with my AWS Systems Manager
+
+enable inbound traffic 443 and add the vpc subnets 10.0.0.0/16
+
+Steps
+1) Create a VPC with private subnets
+2) Create an IAM role for the EC2 and select AmazonSSMManagedInstanceCore
+3) save as EC2SSM
+4) Attach the role to the private EC2 Instance
+5) Note the Vpcid and subnhetid for the instance
+6) Go to Vpc console and select endpoints
+7) choose awsservices
+8) select com.amazonaws.region.ssm and choose the vpc and subnet and select enable for this endpoint
+9)select the proper security groups
+10) we can see the private instance in SSM managed instances

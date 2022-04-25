@@ -1,0 +1,22 @@
+RDS Multi-AZ Failover
+
+ Steps
+1) Create a Vpc in a Mumbai region (10.100.0.0/16)
+2) Public subnet (10.100.0.0/24) (Ec2 instance)
+3) Private subnet A (10.100.1.0/24, B(10.100.2.0/24)
+4) Go to RDS
+5) Select subnet groups --> create --> My-vpc-db-subnet-group
+   Description (Fail-over) ---> choose a Vpc and select both subnets private/public Ec2/RDS in public (ap-south-1, ap-south-b)
+6) Create Database in RDS mysql and select the subet group which created and select the create a multi-AZ
+7) Select the AZ ap-south-1
+8) Launch a EC2 Instance in the public subnet and access it and create a table and insert the rows
+9) to verify that failover is actually happened type the below commands
+
+  while true; do host "RDS Endpoint"; sleep 3; done
+10) Reboot the database with the fail-over
+11) Database will be placed  in another AZ
+
+
+
+
+

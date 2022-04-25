@@ -1,0 +1,646 @@
+AWS Bash Shell Scripts and Json Policy
+
+1) To check How many instances Running in the AWS Account
+#!/bin/bash
+#List Instances In Each Region.
+for region in $(aws ec2 describe-regions --output text | cut -f3)
+do
+     aws ec2 describe-instances --region "$region" --output text --query 'Reservations[*].Instances[*].[Placement.AvailabilityZone, InstanceId, InstanceType, ImageId, PublicIpAddress ]'
+done
+
+2) No Incoming Traffic to the Security Group
+
+#!/bin/bash
+
+#Find Bad Network Rules:
+Open=$(aws ec2 describe-security-groups --filters "Name=ip-permission.cidr,Values=0.0.0.0/0" --query "SecurityGroups[].[GroupId, GroupName]" --output text)
+
+#Add a line
+printf "\n"
+
+#Display Title.
+printf "The Following Security Groups Have No Ingress Filtering: \033[0K\r"
+printf '\n'
+
+while read -r line; do
+  GroupId=$(echo "$line" | awk '{print $1;}')
+  GroupName=$(echo "$line" | awk '{print $2;}')
+  Count=$(aws ec2 describe-network-interfaces --filters "Name=group-id,Values=$GroupId" --query "length(NetworkInterfaces)" --output text)
+  if [[ $Count -ne 0 ]]
+  then
+    printf "%s(%s) is being used on %s EC2 Server(s)." "$GroupName" "$GroupId" "$Count"
+    printf '\n'
+  else
+    :
+  fi
+done <<< "$Open"
+
+
+3) Finding the security groups which is not used so many days
+
+#!/bin/bash
+
+#List SecurityGroups:
+Open=$(aws ec2 describe-security-groups --query "SecurityGroups[].[GroupId, GroupName]" --output text)
+
+#Add a line
+printf "\n"
+
+#Display Title.
+printf "The Following Security Groups Are Not Used: \033[0K\r"
+printf '\n'
+
+while read -r line; do
+  GroupId=$(echo "$line" | awk '{print $1;}')
+  GroupName=$(echo "$line" | awk '{print $2;}')
+  Count=$(aws ec2 describe-network-interfaces --filters "Name=group-id,Values=$GroupId" --query "length(NetworkInterfaces)" --output text)
+  if [[ $Count -ne 0 ]]
+  then
+    :
+  else
+    printf "%s(%s)" "$GroupName" "$GroupId"
+    printf '\n'
+  fi
+done <<< "$Open"
+
+4) Adding SSH in the Security groups
+
+#!/bin/bash
+
+# Settings
+OpenPort="22"
+IP=$(curl -s http://checkip.amazonaws.com)
+security_groups=$(aws ec2 describe-security-groups --query "SecurityGroups[].[GroupId, GroupName]" --output text | awk '{print $2;}')
+
+for security_group in $security_groups
+do
+  printf "Adding access from %s to port %s in the %s security group." "$IP" "$OpenPort" "$security_group"
+  printf "\n"
+  aws ec2 authorize-security-group-ingress --group-name "$security_group" --ip-permissions '[{"IpProtocol": "tcp", "FromPort": '$OpenPort', "ToPort": '$OpenPort', "IpRanges": [{"CidrIp": "'"$IP"'/32", "Description": "SSH Access Added From Script"}]}]'
+done
+
+
+5) Removing SSH in the Security groups
+
+#!/bin/bash
+
+# Settings
+OpenPort="22"
+IP=$(curl -s http://checkip.amazonaws.com)
+security_groups=$(aws ec2 describe-security-groups --query "SecurityGroups[].[GroupId, GroupName]" --output text | awk '{print $2;}')
+
+for security_group in $security_groups
+do
+  printf "Removing access from %s to port %s in the %s security group." "$IP" "$OpenPort" "$security_group"
+  printf "\n"
+  aws ec2 revoke-security-group-ingress --group-name "$security_group" --ip-permissions '[{"IpProtocol": "tcp", "FromPort": '$OpenPort', "ToPort": '$OpenPort', "IpRanges": [{"CidrIp": "'"$IP"'/32"}]}]'
+done
+
+
+6) Allows the IAM user to launch instance only in the us-east-1 region 
+
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": "ec2:*",
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "ec2:Region": "us-east-1"
+                }
+            }
+        },
+        {
+            "Sid": "VisualEditor1",
+            "Effect": "Deny",
+            "Action": "ec2:*",
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "ec2:Region": [
+                        "us-east-2",
+                        "us-west-1",
+                        "us-west-2",
+                        "ca-central-1",
+                        "cn-north-1",
+                        "eu-west-1",
+                        "eu-central-1",
+                        "eu-west-2",
+                        "eu-west-3",
+                        "ap-northeast-1",
+                        "ap-northeast-2",
+                        "ap-southeast-1",
+                        "ap-southeast-2",
+                        "ap-south-1",
+                        "sa-east-1"
+                    ]
+                }
+            }
+        }
+    ]
+}
+
+
+7) To see all the creadentials in the s3 bucket and see list of buckets
+
+#!/bin/bash
+#Lists all ACLs for S3 buckets in your account. 
+
+#Remove Old Working Files.
+rm -rf buckets.txt
+rm -rf bucketpolicies.txt
+
+#List All Buckets
+aws s3 ls | awk '{print $3}' > buckets.txt
+
+#Find & Print ACLs for Buckets
+for i in $(cat buckets.txt)
+do
+        printf "$i \n" >> bucketpolicies.txt
+        aws s3api get-bucket-acl --bucket "$i"  --output text >> bucketpolicies.txt
+        printf "\n" >> bucketpolicies.txt
+done
+
+
+8) This script will create the S3 IAM user, generate IAM keys, add to IAM group, generate user policy
+
+#!/usr/bin/env bash
+# This script will create the S3 IAM user, generate IAM keys, add to IAM group, generate user policy
+# You will want to modify for your own naming conventions and IAM user group name
+# Requires awscli and local IAM account with sufficient permissions
+
+# Verify AWS CLI Credentials are setup
+# http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html
+if ! grep -q aws_access_key_id ~/.aws/config; then
+  if ! grep -q aws_access_key_id ~/.aws/credentials; then
+    echo "AWS config not found or CLI not installed. Please run \"aws configure\"."
+    exit 1
+  fi
+fi
+
+echo "This script will create the S3 IAM user, generate IAM keys, add to IAM group, generate user policy."
+read -r -p "Enter the client name: " CLIENT
+
+echo " "
+echo "====================================================="
+echo "Creating IAM User: "s3-$CLIENT
+aws iam create-user --user-name s3-$CLIENT --output json
+echo "====================================================="
+echo " "
+echo "====================================================="
+echo "Generating IAM Access Keys"
+aws iam create-access-key --user-name s3-$CLIENT --output json
+echo "====================================================="
+echo " "
+echo "====================================================="
+echo "Adding to IAM Group"
+aws iam add-user-to-group --user-name s3-$CLIENT --group-name s3-users
+
+cat > userpolicy.json << EOL
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:*"
+            ],
+            "Resource": [
+                "arn:aws:s3:::$CLIENT-dev",
+                "arn:aws:s3:::$CLIENT-dev/*",
+                "arn:aws:s3:::$CLIENT-production",
+                "arn:aws:s3:::$CLIENT-production/*",
+                "arn:aws:s3:::$CLIENT-staging",
+                "arn:aws:s3:::$CLIENT-staging/*"
+            ]
+        }
+    ]
+}
+EOL
+echo " "
+echo "====================================================="
+echo "Generating User Policy"
+aws iam put-user-policy --user-name s3-$CLIENT --policy-name $CLIENT-s3-buckets --policy-document file://userpolicy.json
+rm userpolicy.json
+echo " "
+echo "====================================================="
+echo "Completed!  Created user: "s3-$CLIENT
+echo "====================================================="
+
+9) Script to backup all S3 bucket contents locally
+
+#!/usr/bin/env bash
+# Script to backup all S3 bucket contents locally
+# Contents of each S3 bucket will be copied to the local subfolder specified
+# Requires aws cli (AWS CLI profile must have IAM permission to access all buckets)
+
+SUBFOLDER=s3-bucket-local-backup-$(date +%Y-%m-%d)
+
+# Functions
+
+# Fail
+function fail(){
+  tput setaf 1; echo "Failure: $*" && tput sgr0
+  exit 1
+}
+
+# Check for command
+function check_command {
+  type -P $1 &>/dev/null || fail "Unable to find $1, please install it and run this script again."
+}
+
+# Completed
+function completed(){
+  echo
+  HorizontalRule
+  tput setaf 2; echo "Completed!" && tput sgr0
+  HorizontalRule
+  echo
+}
+
+# Horizontal Rule
+function HorizontalRule(){
+  echo "============================================================"
+}
+
+# Verify AWS CLI Credentials are setup
+# http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html
+if ! grep -q aws_access_key_id ~/.aws/config; then
+  if ! grep -q aws_access_key_id ~/.aws/credentials; then
+    fail "AWS config not found or CLI not installed. Please run \"aws configure\"."
+  fi
+fi
+
+# Check for AWS CLI profile argument passed into the script
+# http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-multiple-profiles
+if [ $# -eq 0 ]; then
+  scriptname=`basename "$0"`
+  echo "Usage: ./$scriptname profile"
+  echo "Where profile is the AWS CLI profile name"
+  echo "Using default profile"
+  echo
+  profile=default
+else
+  profile=$1
+  SUBFOLDER=$SUBFOLDER-$1
+fi
+
+# List buckets
+LS=$(aws s3 ls --profile $profile 2>&1)
+if [ ! $? -eq 0 ]; then
+  fail "$LS"
+fi
+if echo "$LS" | egrep -q "Error|error|not"; then
+  fail "$LS"
+fi
+
+# Get list of all bucket names
+BUCKETNAMES=$(echo "$LS" | cut -d ' ' -f3 | nl)
+
+# Count number of buckets
+TOTALNUMBERS3BUCKETS=$(echo "$BUCKETNAMES" | wc -l | rev | cut -d " " -f1 | rev)
+
+echo
+HorizontalRule
+echo "Local backup running for $TOTALNUMBERS3BUCKETS S3 Buckets"
+echo "Copying files to subfolder: $SUBFOLDER"
+HorizontalRule
+echo
+
+# Make the subfolder directory
+if ! [ -d $SUBFOLDER ]; then
+  mkdir $SUBFOLDER
+fi
+
+START=1
+
+for (( COUNT=$START; COUNT<=$TOTALNUMBERS3BUCKETS; COUNT++ ))
+do
+  CURRENTBUCKET=$(echo "$BUCKETNAMES" | grep -w [^0-9][[:space:]]$COUNT | cut -f2)
+  HorizontalRule
+  echo \#$COUNT $CURRENTBUCKET
+
+  # Determine the bucket region
+  REGION=$(aws s3api get-bucket-location --bucket $CURRENTBUCKET --output text --profile $profile 2>&1)
+  if [ ! $? -eq 0 ]; then
+    fail "$REGION"
+  fi
+  if echo $REGION | grep -q "None"; then
+    REGION="us-east-1"
+  fi
+
+  # Backup the S3 bucket contents
+  BACKUP=$(aws s3 sync s3://$CURRENTBUCKET $SUBFOLDER/$CURRENTBUCKET/ --region $REGION --profile $profile --quiet 2>&1)
+  if [ ! $? -eq 0 ]; then
+    fail "$BACKUP"
+  fi
+  if echo "$BACKUP" | egrep -iq "error|not"; then
+    fail "$BACKUP"
+  fi
+done
+
+completed
+echo "Backup files saved under subfolder: $SUBFOLDER"
+
+10) Allows Full EC2 Access Within a Specific Region, Programmatically and in the Console
+
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": "ec2:*",
+            "Resource": "*",
+            "Effect": "Allow",
+            "Condition": {
+                "StringEquals": {
+                    "ec2:Region": "region"
+                }
+            }
+        }
+    ]
+}
+
+11) count total size of all data stored in a single or in all S3 buckets
+
+#!/usr/bin/env bash
+# Script to count total size of all data stored in a single or in all S3 buckets
+# Requires aws s3api, jq, IAM account must have permission to access all buckets
+
+# Functions
+
+# Fail
+function fail(){
+  tput setaf 1; echo "Failure: $*" && tput sgr0
+  exit 1
+}
+
+# Check for command
+function check_command {
+  type -P $1 &>/dev/null || fail "Unable to find $1, please install it and run this script again."
+}
+
+# Completed
+function completed(){
+  echo
+  HorizontalRule
+  tput setaf 2; echo "Completed!" && tput sgr0
+  HorizontalRule
+  echo
+}
+
+# Horizontal Rule
+function HorizontalRule(){
+  echo "============================================================"
+}
+
+# Verify AWS CLI Credentials are setup
+# http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html
+if ! grep -q aws_access_key_id ~/.aws/config; then
+  if ! grep -q aws_access_key_id ~/.aws/credentials; then
+    fail "AWS config not found or CLI not installed. Please run \"aws configure\"."
+  fi
+fi
+
+# Check for AWS CLI profile argument passed into the script
+# http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-multiple-profiles
+if [ $# -eq 0 ]; then
+  scriptname=`basename "$0"`
+  echo "Usage: ./$scriptname profile"
+  echo "Where profile is the AWS CLI profile name"
+  echo "Using default profile"
+  echo
+  profile=default
+else
+  profile=$1
+fi
+
+# Check required commands
+check_command "aws"
+check_command "jq"
+
+# Convert bytes to human readable
+function bytestohr(){
+    SLIST="bytes,KB,MB,GB,TB,PB,EB,ZB,YB"
+
+    POWER=1
+    VAL=$( echo "scale=2; $1 / 1" | bc)
+    VINT=$( echo $VAL / 1024 | bc )
+    while [ $VINT -gt 0 ]
+    do
+        let POWER=POWER+1
+        VAL=$( echo "scale=2; $VAL / 1024" | bc)
+        VINT=$( echo $VAL / 1024 | bc )
+    done
+
+    echo $VAL $( echo $SLIST | cut -f$POWER -d, )
+}
+
+# One bucket or all buckets
+function choiceMenu(){
+  tput smul; echo "Single S3 bucket or all buckets?" && tput sgr0
+  echo 1. Single bucket
+  echo 2. All buckets
+  echo
+  read -r -p "Menu selection #: " menuSelection
+
+  case $menuSelection in
+    1)
+      SingleBucket
+    ;;
+    2)
+      AllBuckets
+    ;;
+    *)
+      fail "Invalid selection!"
+    ;;
+  esac
+}
+
+function SingleBucket(){
+  read -r -p "Bucket name: s3://" CURRENTBUCKET
+  echo
+  echo "Calculating size..."
+  CURRENTBUCKETREGION=$(aws s3api get-bucket-location --bucket $CURRENTBUCKET --output text --profile $profile 2>&1)
+  if echo $CURRENTBUCKETREGION | grep -q None; then
+    REGION="us-east-1"
+  else
+    REGION=$CURRENTBUCKETREGION
+  fi
+  CURRENTBUCKETSIZE=$(aws s3api list-objects --bucket $CURRENTBUCKET --region $REGION --output json --query "[sum(Contents[].Size)]" --profile $profile 2>&1)
+  if echo $CURRENTBUCKETSIZE | grep -q invalid; then
+    CURRENTBUCKETSIZE="0"
+  else
+    CURRENTBUCKETSIZE=$(echo "$CURRENTBUCKETSIZE" | jq '.[]')
+  fi
+  echo
+  echo "Size: "
+  bytestohr $CURRENTBUCKETSIZE
+  completed
+}
+
+function AllBuckets(){
+  # List buckets
+  LS=$(aws s3 ls --profile $profile 2>&1)
+
+  # Count number of buckets
+  TOTALNUMBERS3BUCKETS=$(echo "$LS" | wc -l | rev | cut -d " " -f1 | rev)
+
+  # Get list of all bucket names
+  BUCKETNAMES=$(echo "$LS" | cut -d ' ' -f3 | nl)
+
+  echo
+  HorizontalRule
+  echo "Counting Total Size of Data in $TOTALNUMBERS3BUCKETS S3 Buckets"
+  echo "(This may take a very long time depending on number of files)"
+  HorizontalRule
+  echo
+
+  START=1
+  TOTALBUCKETSIZE=0
+
+  for (( COUNT=$START; COUNT<=$TOTALNUMBERS3BUCKETS; COUNT++ ))
+  do
+    CURRENTBUCKET=$(echo "$BUCKETNAMES" | grep -w [^0-9][[:space:]]$COUNT | cut -f2)
+    HorizontalRule
+    echo \#$COUNT $CURRENTBUCKET
+
+    CURRENTBUCKETREGION=$(aws s3api get-bucket-location --bucket $CURRENTBUCKET --output text --profile $profile 2>&1)
+    if echo $CURRENTBUCKETREGION | grep -q None; then
+      REGION="us-east-1"
+    else
+      REGION=$CURRENTBUCKETREGION
+    fi
+    CURRENTBUCKETSIZE=$(aws s3api list-objects --bucket $CURRENTBUCKET --region $REGION --output json --query "[sum(Contents[].Size)]" --profile $profile 2>&1)
+    if echo $CURRENTBUCKETSIZE | grep -q invalid; then
+      CURRENTBUCKETSIZE="0"
+    else
+      CURRENTBUCKETSIZE=$(echo "$CURRENTBUCKETSIZE" | jq '.[]')
+    fi
+    TOTALBUCKETSIZE=$(($TOTALBUCKETSIZE + $CURRENTBUCKETSIZE))
+    echo "Size: "
+    bytestohr $CURRENTBUCKETSIZE
+    echo "Subtotal: "
+    bytestohr $TOTALBUCKETSIZE
+  done
+
+  completed
+  echo "Total Size of Data in All $TOTALNUMBERS3BUCKETS S3 Buckets:"
+  bytestohr $TOTALBUCKETSIZE
+}
+
+choiceMenu
+
+12)  List the Group name of all the SecurityGroups
+
+#!/bin/bash
+# List the Group name of all the SecurityGroups
+
+if [ "$1" == "-h" ]
+then
+	echo "This script print the name of all the SecurityGroups
+Usage: $0"
+	exit 0
+fi
+aws ec2 describe-security-groups | jq .SecurityGroups[].GroupName| tr -d \"
+
+13) starts all instances with a specific tag.
+
+#!/usr/bin/python
+'''
+This script starts all instances with a specific tag.
+'''
+
+import boto3
+
+def instances_find(name, value):
+    '''
+    Finds instance id's based on tags.
+    Returns a list of instances found.
+    '''
+    list_instances = []
+    # filter based on tags
+    filters =[
+        {
+        'Name': name,
+        'Values': [
+            value,
+            ]
+        },
+    ]
+    instances = ec2_resource.instances.filter(Filters=filters)
+    for instance in instances:
+        # for each instance, append to list
+        list_instances.append(instance.id)
+    return list_instances
+
+def instances_start(list):
+    '''
+    Starts instances defined in the list.
+    '''
+    ec2_client.start_instances(InstanceIds=list)
+
+# enter tag name and value
+tag_name = 'tag:environment'
+tag_value = 'dev'
+
+ec2_resource = boto3.resource('ec2')
+ec2_client = boto3.client('ec2')
+
+# find instances
+ec2_list = instances_find(tag_name, tag_value)
+# start instances
+ec2_stop = instances_start(ec2_list)
+print('started instances: ' + str(ec2_list))
+
+14) stops all instances with a specific tag.
+
+#!/usr/bin/python
+'''
+This script stops all instances with a specific tag.
+'''
+
+import boto3
+
+def instances_find(name, value):
+    '''
+    Finds instance id's based on tags.
+    Returns a list of instances found.
+    '''
+    list_instances = []
+    # filter based on tags
+    filters =[
+        {
+        'Name': name,
+        'Values': [
+            value,
+            ]
+        },
+    ]
+    instances = ec2_resource.instances.filter(Filters=filters)
+    for instance in instances:
+        # for each instance, append to list
+        list_instances.append(instance.id)
+    return list_instances
+
+def instances_stop(list):
+    '''
+    Stops instances defined in the list.
+    '''
+    ec2_client.stop_instances(InstanceIds=list)
+
+# enter tag name and value
+tag_name = 'tag:environment'
+tag_value = 'dev'
+
+ec2_resource = boto3.resource('ec2')
+ec2_client = boto3.client('ec2')
+
+# find instances
+ec2_list = instances_find(tag_name, tag_value)
+# stop instances
+ec2_stop = instances_stop(ec2_list)
+print('stopped instances: ' + str(ec2_list))
+

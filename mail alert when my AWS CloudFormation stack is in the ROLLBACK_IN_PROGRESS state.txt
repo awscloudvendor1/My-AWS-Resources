@@ -1,0 +1,218 @@
+mail alert when my AWS CloudFormation stack is in the ROLLBACK_IN_PROGRESS state
+
+After you complete the steps in the Resolution section, you can expect the notification to work as follows:
+
+Your AWS CloudFormation stack sends all notifications to the Amazon Simple Notification Service (Amazon SNS) topic that notifies the AWS Lambda function.
+The Lambda function parses notifications and sends only "ROLLBACK_IN_PROGRESS" notifications to a second Amazon SNS topic that's configured for email alerts.
+This second SNS topic sends an email to subscribers regarding the "ROLLBACK_IN_PROGRESS" message.
+Resolution
+Create an SNS topic and subscription for email alerts
+
+1.    Open the Amazon SNS console.
+
+2.    In the navigation pane, choose Topics.
+
+Note: To use an existing topic, select that topic from the resource list, and then skip to step 7.
+
+3.    Choose Create topic.
+
+4.    For Name, enter a topic name.
+
+5.    For Display name, enter a display name.
+
+6.    Choose Create topic.
+
+7.    Note your topic's Amazon Resource Name (ARN) for later use.
+
+8.    Choose Create subscription.
+
+9.    For Topic ARN, choose the SNS topic ARN that you noted in step 7.
+
+10.    For Protocol, choose Email.
+
+11.    For Endpoint, enter your email address.
+
+12.    Choose Create subscription.
+
+You'll receive a subscription confirmation email from Amazon SNS from the email address that you entered in step 11.
+
+13.    From the confirmation email message, choose Confirm subscription.
+
+You'll see a subscription confirmation message in your browser.
+
+Create an AWS Identity and Access Management (IAM) policy that allows Lambda to publish to the SNS topic for email alerts
+
+Note: This policy also allows Lambda to write to Amazon CloudWatch Logs.
+
+1.    Open the IAM console.
+
+2.    In the navigation pane, choose Policies.
+
+3.    Choose Create policy.
+
+4.    Choose the JSON tab, and then enter the following code into the JSON code editor:
+
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "sns:Publish"
+      ],
+      "Resource": [
+        "{awsExampleSNSTopicARN}"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "arn:aws:logs:*:*:*"
+    }
+  ]
+}
+Note: Replace awsExampleSNSTopicARN with the ARN for the SNS topic that you created for email alerts.
+
+5.    Choose Review policy.
+
+6.    For Name, enter a policy name.
+
+7.    Choose Create policy.
+
+Attach the IAM policy to an IAM role for Lambda
+
+1.    Open the IAM console.
+
+2.    In the navigation pane, choose Roles.
+
+3.    Choose Create role.
+
+4.    In the Select type of trusted entity section, choose AWS service.
+
+5.    In the Choose the service that will use this role section, choose Lambda.
+
+6.    Choose Next: Permissions.
+
+7.    In the search bar, enter the name of the policy that you created earlier, and then select that policy.
+
+8.    Choose Next:Tags, and then create an optional IAM tag.
+
+9.    Choose Next: Review.
+
+10.    For Role name, enter a role name.
+
+11.    Choose Create role.
+
+Create a Lambda function and assign the IAM role that you created
+
+1.    Open the Lambda console.
+
+2.    Choose Create function.
+
+3.    Choose Author from scratch.
+
+4.    For Name, enter a name for the Lambda function.
+
+5.    For Runtime, choose Node.js 10.x.
+
+6.    For Execution role, choose Use an existing role.
+
+7.    For Existing role, choose the IAM role that you created earlier.
+
+8.    Choose Create function.
+
+Create a second SNS topic and subscription to notify the Lambda function
+
+1.    Open the Amazon SNS console.
+
+2.    In the navigation pane, choose Topics.
+
+3.    Choose Create topic.
+
+4.    For Name, enter a topic name.
+
+5.    For Display name, enter a display name.
+
+6.    Choose Create topic.
+
+7.    Note the ARN of your topic for later use.
+
+8.    Choose Create subscription.
+
+9.    For Topic ARN, choose the SNS topic ARN that you noted in step 7.
+
+10.    For Protocol, choose AWS Lambda.
+
+11.    For Endpoint, choose the Lambda function that you created.
+
+12.    Choose Create subscription.
+
+Update the Lambda function with a script that publishes to the SNS topic
+
+1.    Open the Lambda console.
+
+2.    In the navigation pane, choose Functions, and then select the function that you created earlier.
+
+3.    In the Function code section, enter the following script into the editor pane:
+topic_arn = "{awsExampleSNSTopicARN}";
+var AWS = require('aws-sdk'); 
+AWS.config.region_array = topic_arn.split(':'); // splits the ARN into an array 
+AWS.config.region = AWS.config.region_array[3];  // makes the 4th variable in the array (will always be the region)
+
+// ####################   BEGIN LOGGING   ########################
+
+console.log(topic_arn);   // just for logging to the that the var was parsed correctly
+console.log(AWS.config.region_array); // to see if the SPLIT command worked
+console.log(AWS.config.region_array[3]); // to see if it got the region correctly
+console.log(AWS.config.region); // to confirm that it set the AWS.config.region to the correct region from the ARN
+
+// ####################  END LOGGING (you can remove this logging section)  ########################
+
+exports.handler = function(event, context) {
+    const message = event.Records[0].Sns.Message;
+    if (message.indexOf("ROLLBACK_IN_PROGRESS") > -1) {
+        var fields = message.split("\n");
+        subject = fields[11].replace(/['']+/g, '');
+        send_SNS_notification(subject, message);   
+    }
+};
+
+function send_SNS_notification(subject, message) {
+    var sns = new AWS.SNS();
+    subject = subject + " is in ROLLBACK_IN_PROGRESS";
+    sns.publish({ 
+        Subject: subject,
+        Message: message,
+        TopicArn: topic_arn
+    }, function(err, data) {
+        if (err) {
+            console.log(err.stack);
+            return;
+        } 
+        console.log('push sent');
+        console.log(data);
+    });
+}
+Note: Replace awsExampleSNSTopicARN with the ARN for the SNS topic that you created for email alerts.
+
+4.    In the Designer view, in the Add triggers section, choose SNS.
+
+5.    In the Configure triggers section, for SNS topic, choose the SNS topic that you created to notify the Lambda function.
+
+6.    Choose Add.
+
+7.    Choose Save.
+
+Set your AWS CloudFormation stack to send all notifications to the SNS topic that notifies the Lambda function
+
+1.    Open the AWS CloudFormation console, and follow the steps in the setup wizard to create a stack.
+
+2.    For Notification options, choose Existing Amazon SNS topic.
+
+3.    Choose the SNS topic that you created to notify the Lambda function.
+
+4.    Complete the steps in the setup wizard to create your stack.

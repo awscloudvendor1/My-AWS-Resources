@@ -1,0 +1,24 @@
+Running Hyper-V on Amazon EC2 Bare Metal Instances
+
+1) Go to the AMI Images and select public images
+2) set the owner as a amazon images ---> search: hyper-v
+3) select windows_server-2016-English-Full-Hyper-V-2018.09.15 (Latest image)
+4) select launch and select the i3.metal instance that supports Hyper-v
+5) Launch the instance and RDP the instance
+6) Hyper-v role is already installed 
+7) open powershell create a new internal hyper-v swicth
+   
+    New-VMSwitch -SwitchName "Hyper-VSwitch" -SwitchType Internal
+
+8) Go to ncpa.cpl and their created a hyper-v new switch adapter
+9) Assign the ip address to the newely created switch
+   
+    Get-NetAdapter
+    New-NetIPAddress -IPAddress 192.168.0.1 -PrefixLength 24 -InterfaceIndex 13
+
+10) New-NetNat -Name MyNATNetwork -InternalIPInterfaceAddressPrefix 192.168.0.0/24
+11) Install the DHCP role and make sure DHCP tools also installed (Remote server Administration tools ---> Role Administration tools ---> DHCP server Tools
+12) Go to DHCP server Manager and select ipv4 ---> new scope ---> Guestiprange ---> next ---> 192.168.0.10 to 192.168.0.20 ---> next ---> Default gateway (192.168.0.1) ---> Dns server (select the amazon provided) ---> finish
+13) Install the new Guest VM (Need the ISO image)
+14) open the Hyper-v and install the hyper-v 
+15) ping and check the connectivity

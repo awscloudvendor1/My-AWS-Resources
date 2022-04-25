@@ -1,0 +1,52 @@
+ 
+ Route 53
+
+ Configure the Custom Vpc in Any region
+
+ Create a Private Hosted zone
+ Domain name = myprivatezonedemo.com
+ select the VPC
+ launch the  instance in ap-south-1a with public ip and configure the web server
+ launch the  instance in ap-south-1b no public ip 
+ priv01 =  ap-south-1a  (Public ip)
+ priv02 =  ap-south-1b (no public ip)
+
+ go to route 53 create a record
+ 
+ copy the private ip address of the machine
+  create record set = A (priv01)
+                      A (Priv02)
+
+ Login in to the public instance and copy the priv02 name and type ssh priv02.myprivatezonedemo.com
+ make sure its works
+
+ Connecting public hosted zones
+
+ A record = zeedup.tk
+ CNAME = www.zeedup.tk.
+
+ Creating a static web site
+
+  create two a bucket = zeedup.tk. , www.zeedup.tk.
+
+ upload the index.txt, error.txt and make them public 
+ in the www.zeedup.tk bucket static web site hosting give the redirect site option = zeedup.tk.
+
+  goto route53
+
+ Delete the ec2 servers records  
+ Create a Alias record for the zeedup.tk. bucket in the route 53 
+ 
+
+ 
+
+ 
+
+ 
+ 
+
+
+
+
+
+ 

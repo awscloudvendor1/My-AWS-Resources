@@ -1,0 +1,4 @@
+Save AWS cost with simple automation
+
+
+https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate?filter=active&templateURL=https%3A%2F%2Fs3.amazonaws.com%2Fkvriksh-aws-usage-reports%2Flambda.template&stackName=AWSUsageReport&param_Schedule=19

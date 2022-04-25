@@ -1,0 +1,69 @@
+Running Ansible playbook using AWS Systems Manager
+
+
+Pre-Requisities
+IAM Role - i.e ManagedInstanceRole - with managed permissions Get Help for setting up IAM Role
+AmazonEC2RoleforSSM - To allow Lambda to log events
+Prepare Target Instances
+Lets use a RedHat 7.x Linux instances as our target instance.
+
+Assign the IAM Role created in the prerequisite
+Install SSM Agent
+sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+sudo systemctl enable amazon-ssm-agent
+sudo systemctl start amazon-ssm-agent
+sudo systemctl status amazon-ssm-agent
+
+Install Ansible in Redhat 7
+sudo rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+sudo yum -y install ansible
+
+Tag the instance
+TagKey:OS
+TagValue:RedHat
+
+Create SSM State Manager
+Choose State Manager from the System Manager Services
+Click on Create Association
+Name = install-HTTP-On-RedHat
+Document name prefix: Equal : AWS-RunAnsiblePlaybook
+Select the AWS-RunAnsiblePlaybook
+For Targets Choose Specifying tags
+Choose appropriate schedule.
+In the Parameters Section, paste the playbook YAML directly.
+Define the max errors as 1. This means that if the execution encounters 1 error it will stop on the remaining targets.
+Testing the solution
+Create an adhoc run using the Run Command manually, check the S3 Logs for execution results.
+
+ToDo
+Load the playbook into CodeCommit and bring it under version control.
+or Use S3 version control for the playbook(s) to be stored.
+
+Ansible Playbook
+
+---
+# This playbook will install Apache Web Server with php and mysql support
+- name: linux_deploy_httpd
+  hosts: all
+  tasks:
+  - name: Install HTTPD
+    yum:
+      name: "{{ item }}"
+      state: latest
+    loop:
+     - httpd
+    when: ansible_os_family == "RedHat"
+
+  - name: Setting default HTTP Server page
+    shell: echo "<h1>welcome to Zeedup Technologies Playbook Demo</h1>" >> /var/www/html/index.html
+
+  - name: Start Apache Webserver
+    service:
+      name: httpd
+      state: restarted
+
+  - name: enable apache on startup and start service for redhat or centos
+    service: name=httpd enabled=yes state=started
+    when: ansible_os_family == "RedHat"
+
+

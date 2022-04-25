@@ -1,0 +1,47 @@
+RDS Read Replica Across Region
+
+Steps
+1) Create a Vpc in Mumbai region 10.100.0.0/16 (Keep Public and Private A in Same AZ and Private B in another AZ)
+   public subnet 10.100.0.0/24
+   (Keep the instance in public subnet)
+   private subnet A 10.100.1.0/24
+   (Run the RDS in the Private subnet A)   
+   private subnet B 10.100.2.0/24
+    (Keep empty)
+
+2) Create a VPC in N.Varginia Region 10.100.0.0/16 (Keep both subnets in same AZ)
+    Public subnet 10.200.0.0/24
+    (Run the Ec2 on this subnet)
+   Private subnet A 10.200.1.0/24
+   (RDS Replica will be done here)
+   Private subnet B 10.200.2.0/24
+    (Keep empty)
+
+3) Create RDS in Mumbai-region
+
+4) go to N.Varginia region and add the subnet group
+   Name = Read-Replica-db-subnet-group
+   Select the VPC
+   select the 2 private subnets and attached it 10.200.1.0, 10.200.2.0 create it
+   
+5) Go to Mumbai Region and select RDS and open create replica
+   select N.Varginia and it will automatically show the N.vargnia db-subnet-groupname
+   select the us-east-1a (Where rds is running)
+   Db Instance identifier = Read replica
+   create replica
+   
+6) Go N.varginia region and u can see the DB from Mumbai
+   Create a security group opening the port 3306 and allow 10.200.0.0/24
+   go back RDS change the security group
+   Launch an instance in N.varginia Region attch in a public subnet
+
+7) Go Mumbai region Ec2-instance and Launch and install mysql
+   connect mysql 
+   create a tables and insert the fields
+   and go to n.varginia region user can see the same table updated  
+   
+   
+  
+  
+   
+   

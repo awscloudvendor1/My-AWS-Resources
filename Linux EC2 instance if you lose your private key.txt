@@ -1,0 +1,22 @@
+Linux EC2 instance if you lose your private key
+
+1) Launch 2 Linux Instance with the public ip enabled
+2) Ensure that both instances use different keys
+3) Enable port 22 for SSH on the both instances
+4) Name instance1 as original instance and its attached Root Ebs Volme as Original Volume (Key Lost)
+5) Name instance2 as Temp instance and its attached Root Ebs Volme as Temp Volume
+6) Stop the Original instance
+7) Detach the root original volume from the original instance
+8) Attach original volume to the temp instance 
+9) copy .ssh/authorized_keys from Temp volume to Original volume
+ 
+    lsblk
+    sudo mkdir /mnt/tempvol
+    sudo mount -o nouuid /dev/xvdf1 /mnt/tempvol
+    cp .ssh/authorized_keys /mnt/tempvol/home/ec2-user/.ssh/authorized_keys
+    sudo ls -l /mnt/tempvol/home/ec2-user/.ssh
+    sudo umount /mnt/tempvol
+
+10) Deattch the original volume from the Temp instance
+11) Re-attach the original volume to the original instance as the root volume
+12) start the original instance and connect to to the original instance using the key pair of yout temp instance

@@ -1,0 +1,10 @@
+Save AWS cost with simple automation cloudformation
+
+https://s3.amazonaws.com/kvriksh-aws-usage-reports/lambda.template
+
+give the mail id
+run the automation 
+pass the variable via lambda
+accept the mail from aws
+again test the lambda function
+check the mail for complete details

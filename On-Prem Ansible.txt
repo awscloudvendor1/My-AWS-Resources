@@ -1,0 +1,16 @@
+- name: ec2 launcher
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: launch ec2
+      ec2:
+         instance_type: t2.micro
+         key_name: Recovery
+         image:  ami-0c5cb288614564c01
+         region: ap-south-1
+         count: 1
+         vpc_subnet_id: subnet-0b335ccd3c7ecfb66
+         assign_public_ip: yes
+         group: default
+         instance_tags:
+           Ansible: script

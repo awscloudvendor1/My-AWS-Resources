@@ -1,0 +1,9 @@
+Configuring s3fs
+(https://github.com/s3fs-fuse/s3fs-fuse.git)
+sudo yum install automake fuse fuse-devel gcc-c++ git libcurl-devel libxml2-devel make openssl-devel -y
+
+vi /etc/passwd-s3fs
+AWS_ACCESS_KEY_ID:AWS_SECRET_ACCESS_KEY
+
+chmod 600 /etc/passwd-s3fs
+s3fs mybucket /path/to/mountpoint -o passwd_file=/etc/passwd-s3fs

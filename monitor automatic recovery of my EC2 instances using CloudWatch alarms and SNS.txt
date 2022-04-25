@@ -1,0 +1,22 @@
+monitor automatic recovery of my EC2 instances using CloudWatch alarms and SNS
+
+Create a CloudWatch alarm for your EC2 instances. For more information, see How can I set up a CloudWatch alarm to automatically recover my EC2 instance?
+
+For Send notification to, enter your SNS topic name.
+For Take the action, choose Recover.
+Configure CloudWatch Events to monitor the following AWS Health events. For Target, choose the SNS topic you created.
+
+AWS_EC2_INSTANCE_AUTO_RECOVERY_SUCCESS
+AWS_EC2_INSTANCE_AUTO_RECOVERY_NO_ACTION
+AWS_EC2_INSTANCE_AUTO_RECOVERY_FAILURE
+
+You can also use the AWS Command Line Interface (AWS CLI) to list the AWS Health events associated with EC2 instance automatic recovery. Use the command describe-event-types with the appropriate --region as follows:
+$ aws health describe-event-types --filter services=EC2 --query eventTypes[].code --region us-east-1 | grep AUTO_RECOVERY
+"AWS_EC2_INSTANCE_AUTO_RECOVERY_FAILURE",
+"AWS_EC2_INSTANCE_AUTO_RECOVERY_NO_ACTION",
+"AWS_EC2_INSTANCE_AUTO_RECOVERY_SUCCESS",
+Automatic recovery results are then emailed to both your AWS account's main contact and alternate contact. Look for email subject lines similar to:
+
+[Auto Recovery] Amazon EC2 instance recovery: Success
+[Auto Recovery] Amazon EC2 instance recovery: No action taken
+[Auto Recovery] Amazon EC2 instance recovery: Failure

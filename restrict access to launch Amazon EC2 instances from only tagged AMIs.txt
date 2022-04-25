@@ -1,0 +1,41 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ReadOnlyAccess",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:Describe*",
+        "ec2:GetConsole*",
+        "cloudwatch:DescribeAlarms",
+        "cloudwatch:GetMetricStatistics",
+        "iam:ListInstanceProfiles"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "ActionsRequiredtoRunInstancesInVPC",
+      "Effect": "Allow",
+      "Action": "ec2:RunInstances",
+      "Resource": [
+        "arn:aws:ec2:ap-south-1:459699950243:instance/*",
+        "arn:aws:ec2:ap-south-1:459699950243:key-pair/*",
+        "arn:aws:ec2:ap-south-1:459699950243:security-group/*",
+        "arn:aws:ec2:ap-south-1:459699950243:volume/*",
+        "arn:aws:ec2:ap-south-1:459699950243:network-interface/*",
+        "arn:aws:ec2:ap-south-1:459699950243:subnet/*"
+      ]
+    },
+    {
+      "Sid": "LaunchingEC2withAMIsAndTags",
+      "Effect": "Allow",
+      "Action": "ec2:RunInstances",
+      "Resource": "arn:aws:ec2:ap-south-1::image/ami-*",
+      "Condition": {
+        "StringEquals": {
+          "ec2:ResourceTag/Environment": "Prod"
+        }
+      }
+    }
+  ]
+}

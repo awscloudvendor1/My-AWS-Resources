@@ -1,0 +1,17 @@
+Rotate aged SSH Keys automatically with AWS SSM | Improve AWS Security with key rotation at scale
+
+1) Launch an instance think u lost the key or key is damanged
+2) Attach the ssm agent to Ec2 instances
+3) Launch the instance
+ 
+   ssh-keygen -t rsa -N "" -q -f nov19
+   ls nov*
+   cat nov19.pub
+   copy the key
+   go to ssm agent and run command and select run shell script
+   #!/bin/bash
+   /bin/echo -e "paste the public key" >> /home/ec2-user/.ssh/authorized_keys
+
+   select the instance and run 
+   connect the keys ssh -i nov19 ec2-user@public-ip
+ 

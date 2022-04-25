@@ -1,0 +1,222 @@
+Monitoring EC2 with Custom Metrics
+
+ 
+
+You can monitor your EC2 using CloudWatch using:
+
+CPU
+Network
+Disk
+Status Check
+Please note that RAM Utilization is a customer metric. By Default Ec2 monitors is for 5 mins interval, unless you enable detailed monitoring which will then make it 1 min intervals ( it will cost more)
+
+ 
+
+Let’s go to google and search for Amazon EC2 Metrics and Dimensions
+
+ 
+
+https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/ec2-metricscollected.html
+
+ 
+
+we will do a lab and we will create a new EC2 and then we do customize Cloudwatch metric for Memory.
+
+ 
+
+Step 1) We need to create a  CloudWatch Role for EC2 so the EC2 can send some information to CloudWatch
+
+ 
+
+Step 2) Go to IAM , and create a new Role called EC2CloudWatch
+
+ 
+
+Step 3) Pick CoudWatchFullAccess as a Policy
+
+ 
+
+Step 4) Now we will go and create an EC2 instance, then attached above Role to it ; then we will use some Perl Script so that we get customize Memory Utilization
+
+ 
+
+Step 5) Before we do our lab, let’s go to google and type Monitoring Memory and Disk Metrics for EC2 Linux instance
+
+ 
+
+https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/mon-scripts.html
+
+After we login into EC2 Linux, we will go to aparticular directory and run this Command
+
+ 
+
+curl https://aws-cloudwatch.s3.amazonaws.com/downloads/CloudWatchMonitoringScripts-1.2.2.zip -O
+
+ 
+
+ 
+
+Step 6) Now I will go to AWS and start new EC2 instance ( Linux)
+
+ 
+
+Step 7) if you login into Linux, type these
+
+ 
+
+sudo su
+
+yum update –y
+
+ 
+
+Step 8) Now we will install the Perl Script : ( install perl Syslogs and Protocols)
+
+ 
+
+sudo yum install -y perl-Switch perl-DateTime perl-Sys-Syslog perl-LWP-Protocol-https perl-Digest-SHA.x86_64
+
+ 
+
+Step 9) Now I will make a directory that we will install all of our stuff
+
+Type:
+
+mkdir /cloudwatchlab
+
+cd /cloudwatchlab
+
+Step 10) now we will paste the curl commands from Amazon Websites
+
+curl https://aws-cloudwatch.s3.amazonaws.com/downloads/CloudWatchMonitoringScripts-1.2.2.zip -O
+
+Step 11) Now we will unzip it
+
+Step 12) If you type ls we will see it did create a directory called aws-scripts-mon
+
+ 
+
+Now I will remove the Zip file that we downloaded
+
+ 
+
+rm –rf CloudWatchMonitoringScripts-1.2.2.zip
+
+ 
+
+Step 13) I go to the directory
+
+cd aws-scripts-mon/
+
+Then type ls and you see some perl script ( in green color)
+
+mon-put-instance-data.pl
+
+mon-get-instance-stats.pl
+
+ 
+
+Step 14) Now before we push these script to Ec2 , lets go back to AWS console and look at Cloudwatch and we will see there is no Metric for Memory , but after we push above perl scripts ; we will see the Memory Utilization metrics
+
+ 
+
+Step 15) Go to the Dashboards and create a new Dashboards and put CPU utilization ( as we see we do not Memory Utilization)
+
+ 
+
+Call the Dashboard EC2custommetric (make sure save it)
+
+ 
+
+As you click on EC2 and you will see these metric (as I mentioned in the beginning of Lab)
+
+ 
+
+You can monitor your EC2 using CloudWatch using:
+
+CPU
+Network
+Disk
+Status Check
+
+Step 16) Now we go back to our terminal windows and copy and paste this command from AWS websites
+
+ 
+
+I will put this line of code to test and see if our EC2 instance can talk to CloudWatch
+
+ 
+
+./mon-put-instance-data.pl –mem-util –verify –verbose
+
+ 
+
+(Make sure run it at directory called aws-scripts-mon)
+
+ 
+
+As we see we are ok Now.
+
+ 
+
+Verification completed successfully. No actual metrics sent to CloudWatch.
+
+ 
+
+ 
+
+Step 17) Now we will make sure we push the RAM utilization to cloud watch
+
+ 
+
+Copy and paste
+
+ 
+
+./mon-put-instance-data.pl –mem-used-incl-cache-buff –mem-util –mem-used –mem-avail
+
+ 
+
+As we see it say successful
+
+Successfully reported metrics to CloudWatch. Reference Id: 37ce5b72-48ae-11e8-800c-6be073b72519
+
+ 
+
+Step 18) Now we do not want to do manually the above task we want to automated and we can use a concept called “crontab
+
+ 
+
+Step 19) Go to directory etc
+
+ 
+
+cd /etc
+
+nano crontab
+
+then go all the way down and type
+
+ 
+
+*/5 * * * * root ./mon-put-instance-data.pl –mem-used-incl-cache-buff –mem-util –mem-used –mem-avail
+
+ 
+
+Make sure in above remove the . and go to directory you had / cloudwatchlab/aws-scripts-mon
+
+ 
+
+So correct line will be :
+
+*/5 * * * * root /cloudwatchlab/aws-scripts-mon
+
+/mon-put-instance-data.pl –mem-used-incl-cache-buff –mem-util –mem-used –mem-avail
+
+ 
+
+Hint remember the directory is case sensitive
+
+ 
+
+Exit and make sure save it.
