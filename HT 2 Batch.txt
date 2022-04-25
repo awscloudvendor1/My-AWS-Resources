@@ -1,0 +1,5 @@
+Schedule	Batch Name	Meeting id	Username	Password	Status
+Mon - Wed - Fri - Sat - 9.30 Am to 10.30 am	Devops Demo Session Online Hopetutors	851 524 9385	murali@hopetutors.com	Akilan@7985	Inprogress
+Sat - Sun - 11 am to 1 pm	AWS Online session Hope Tutors - Weekend	918 4152 4260	murali@hopetutors.com	Akilan@7985	Inprogress
+Sat - Sun - 3 PM to 5 pm	AWS GCP Training Hope Tutors - 205	960 6149 7037	murali@hopetutors.com	Akilan@7985	Inprogress
+Mon - Fri - 4.30 pm to 5.30 pm	AWS DevOps Training Hope Tutors206	962 8908 4811	murali@hopetutors.com	Akilan@7985	Inprogress

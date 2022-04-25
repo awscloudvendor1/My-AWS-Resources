@@ -1,0 +1,3 @@
+https://www.youtube.com/watch?v=v_YbbNVIEI8 (MongoDB installation on Windows 10)
+
+https://www.youtube.com/watch?v=y_oxGc7LcX4&t=159s(ROBO 3T | Free Open Source MongoDB GUI Client | Simple and Easy to use)
